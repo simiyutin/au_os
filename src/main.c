@@ -82,11 +82,37 @@ void init_idt() {
     write_idtr(&ptr);
 }
 
+void init_interrupt_controller() {
+
+    uint32_t master_command = 0x20;
+    uint32_t master_data = 0x21;
+
+    uint8_t word = 0b11001000; //not using second controller
+    uint8_t first_byte = 32;
+    uint8_t second_byte = 0b00100000;
+    uint8_t third_byte = 0b10000000;
+    uint8_t master_mask = 0b01111111;
+    uint8_t undirected_eoi = 0b00000100;
+
+    out8(master_command, word);
+    out8(master_data, first_byte);
+    out8(master_data, second_byte);
+    out8(master_data, third_byte);
+
+    // теперь замаскируем ненужные ноги
+    out8(master_data, master_mask);
+
+}
+
 void main(void)
 {
 	qemu_gdb_hang();
 
     init_idt();
+
+    // на нулевой ноге мастера ждем прерывание и отобразим его в 32 запись idt
+    init_interrupt_controller();
+
 
     //int test0 = 0;
     //int test = 2 / test0;

@@ -3,7 +3,7 @@
 
 static inline void cause_interrupt()
 {
-    __asm__ ("int $0x00");
+    __asm__ ("int $0x20");
 }
 
 static inline void disable_ints(void)
