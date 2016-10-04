@@ -22,6 +22,11 @@ extern uint64_t table[]; // обработчики
 static struct idt_entry idt_table[33];
 
 #define PORT 0x3f8   /* serial port */
+#define MASTER_COMMAND 0x20
+#define MASTER_DATA 0x21
+#define PIT_COMMAND 0x43
+#define PIT_DATA 0x40
+
 
 void init_serial() {
     out8(PORT + 1, 0x00);    // Disable all interrupts
@@ -56,8 +61,11 @@ void c_handler() {
     print_string(ploho);
 }
 void c_handler2() {
-    char* ploho = "vse ochen horosho\n\0";
-    print_string(ploho);
+    char* horosho = "vse ochen horosho\n\0";
+    print_string(horosho);
+
+    uint8_t undirected_eoi = 0b00000100;
+    out8(MASTER_COMMAND, undirected_eoi);
 }
 
 void init_idt() {
@@ -84,23 +92,32 @@ void init_idt() {
 
 void init_interrupt_controller() {
 
-    uint32_t master_command = 0x20;
-    uint32_t master_data = 0x21;
-
     uint8_t word = 0b11001000; //not using second controller
     uint8_t first_byte = 32;
     uint8_t second_byte = 0b00100000;
     uint8_t third_byte = 0b10000000;
     uint8_t master_mask = 0b01111111;
-    uint8_t undirected_eoi = 0b00000100;
 
-    out8(master_command, word);
-    out8(master_data, first_byte);
-    out8(master_data, second_byte);
-    out8(master_data, third_byte);
+
+    out8(MASTER_COMMAND, word);
+    out8(MASTER_DATA, first_byte);
+    out8(MASTER_DATA, second_byte);
+    out8(MASTER_DATA, third_byte);
 
     // теперь замаскируем ненужные ноги
-    out8(master_data, master_mask);
+    out8(MASTER_DATA, master_mask);
+
+}
+
+void start_pit_interruptions() {
+
+    // i gonna give u two bytes in series bro
+    uint8_t word = 0b00101100;
+    out8(PIT_COMMAND, word);
+
+    // as slow as u can, please
+    out8(PIT_DATA, 0xff);
+    out8(PIT_DATA, 0xff);
 
 }
 
@@ -109,16 +126,17 @@ void main(void)
 	qemu_gdb_hang();
 
     init_idt();
-
     // на нулевой ноге мастера ждем прерывание и отобразим его в 32 запись idt
     init_interrupt_controller();
+
+    start_pit_interruptions();
 
 
     //int test0 = 0;
     //int test = 2 / test0;
 
     //long test2 = INT64_MIN / -1;
-    cause_interrupt();
+    //cause_interrupt();
 
     char* helloworld = "hello, world!\0";
     print_string(helloworld);
