@@ -18,11 +18,6 @@ static void qemu_gdb_hang(void)
 #include "../inc/ints.h"
 
 
-//handlers
-extern uint64_t table[];
-
-static struct idt_entry idt_table[33];
-
 // ports
 #define SERIAL_PORT 0x3f8   /* serial port */
 #define MASTER_COMMAND 0x20
@@ -31,6 +26,11 @@ static struct idt_entry idt_table[33];
 #define SLAVE_DATA 0xA1
 #define PIT_COMMAND 0x43
 #define PIT_DATA 0x40
+
+//handlers
+extern uint64_t table[];
+
+static struct idt_entry idt_table[33];
 
 
 void init_serial() {
@@ -119,8 +119,8 @@ void init_interrupt_controller() {
     out8(SLAVE_DATA, third_byte);
 
 
-//    out8(MASTER_DATA, 0);
-//    out8(SLAVE_DATA, 0);
+    out8(MASTER_DATA, 0b11111110);
+    out8(SLAVE_DATA, 1);
 
 }
 
