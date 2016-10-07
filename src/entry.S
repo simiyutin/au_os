@@ -19,6 +19,7 @@ common:
         pushq %r14
         pushq %r15
         movq %rsp, %rdi
+        cld
         call c_handler
         popq %r15
         popq %r14
@@ -202,6 +203,7 @@ entry32:
         pushq %r14
         pushq %r15
         movq %rsp, %rdi
+        cld
         call c_handler2
         popq %r15
         popq %r14

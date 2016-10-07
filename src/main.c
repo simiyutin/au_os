@@ -62,11 +62,12 @@ void print_string(char* string_to_print) {
     }
 }
 
-// todo добавить аргумент - frame
+
 void c_handler() {
     char* ploho = "vse ochen ploho\n\0";
     print_string(ploho);
 }
+
 void c_handler2() {
     char* horosho = "vse ochen horosho\n\0";
     print_string(horosho);
@@ -118,9 +119,8 @@ void init_interrupt_controller() {
     out8(MASTER_DATA, third_byte);
     out8(SLAVE_DATA, third_byte);
 
-
-    out8(MASTER_DATA, 0b11111110);
-    out8(SLAVE_DATA, 1);
+    out8(MASTER_DATA, 0xff);
+    out8(SLAVE_DATA, 0xff);
 
 }
 
@@ -147,10 +147,7 @@ void main(void) {
     enable_ints();
 
     start_pit_interruptions();
-
-    //print_string("hello, world\0");
-
-    //cause_32_interrupt();
+    out8(MASTER_DATA, 0b11111110);
 
     while (1);
 }
