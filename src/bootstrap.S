@@ -14,6 +14,7 @@
 start32:
 	jmp 1f
 
+
 	.align 16
 multiboot_header:
 	.long MB_HEADER_MAGIC
@@ -134,6 +135,7 @@ setup_mapping:
 	movl $(bootstrap_pml4 - VIRTUAL_BASE), %edi
 	movl $(bootstrap_pml3 - VIRTUAL_BASE + PTE_PRESENT + PTE_WRITE), %eax
 	movl %eax, (%edi)
+	movl %eax, 2048(%edi)
 	movl %eax, 4088(%edi)
 
 	movl %cr4, %eax
@@ -214,8 +216,6 @@ enter_long_mode:
 	.asciz "Enter long mode...\n"
 enable_paging:
 	.asciz "Enable paging...\n"
-azaza:
-    .asciz "so world very hello...\n"
 
 
 	.code64
