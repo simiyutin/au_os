@@ -1,7 +1,7 @@
 #ifndef __INTS_H__
 #define __INTS_H__
 
-static inline void cause_23_interrupt()
+static inline void cause_32_interrupt()
 {
     __asm__ ("int $0x20");
 }

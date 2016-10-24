@@ -5,7 +5,7 @@
 
 struct idt_entry {
     uint16_t handler_last_quarter;
-    uint16_t seg_sel;//TODO как заполнить
+    uint16_t seg_sel;//Kernel_cs
     uint8_t always0; //IST-zeros + undefined-zeros
     uint8_t flags; // TYPE, undefined-zeros, DPL, P
     //TYPE:0xf - trap gate, 0xe - interrupt gate
