@@ -11,18 +11,21 @@ static void qemu_gdb_hang(void)
 #include <ints.h>
 #include <ioport.h>
 #include <memory.h>
+#include <serial.h>
 //todo for clion
 #include "../inc/desc.h"
 #include "../inc/ioport.h"
 #include "../inc/memory.h"
 #include "../inc/ints.h"
 #include "../inc/multiboot.h"
+#include "../inc/print.h"
+#include "../inc/serial.h"
 #include <stdlib.h>
-#include <stdio.h>
+//#include <stdio.h>
 
 
 // ports
-#define SERIAL_PORT 0x3f8   /* serial port */
+
 #define MASTER_COMMAND 0x20
 #define MASTER_DATA 0x21
 #define SLAVE_COMMAND 0xA0
@@ -39,34 +42,7 @@ extern uint64_t table[];
 static struct idt_entry idt_table[33];
 
 
-void init_serial() {
-    out8(SERIAL_PORT + 1, 0x00);    // Disable all interrupts
-    out8(SERIAL_PORT + 3, 0x80);    // Enable DLAB (set baud rate divisor)
-    out8(SERIAL_PORT + 0, 0x03);    // Set divisor to 3 (lo byte) 38400 baud
-    out8(SERIAL_PORT + 1, 0x00);    //                  (hi byte)
-    out8(SERIAL_PORT + 3, 0x03);    // 8 bits, no parity, one stop bit
-}
 
-int is_transmit_done() {
-    return in8(SERIAL_PORT + 5) & 0x20; // if 5th bit is unset, return zero
-}
-
-void write_to_serial(char a) {
-
-    while (!is_transmit_done());
-
-    out8(SERIAL_PORT,a);
-
-}
-
-void print_string(char* string_to_print) {
-
-    init_serial();
-
-    for (unsigned int i=0; string_to_print[i] != '\0'; i++){
-        write_to_serial(string_to_print[i]);
-    }
-}
 
 
 void c_handler() {
@@ -141,6 +117,8 @@ void start_pit_interruptions() {
 }
 
 void main(uint32_t magic, struct multiboot_info* boot_info) {
+
+    serial_setup();
 
     if (magic == 0x2BADB002) {
         print_string("magic 0x2BADB002 is provided!");
