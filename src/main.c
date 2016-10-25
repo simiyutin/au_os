@@ -39,11 +39,11 @@ static void qemu_gdb_hang(void)
 //handlers
 extern uint64_t table[];
 
+extern char text_phys_begin;
+extern char bss_phys_end;
+
+
 static struct idt_entry idt_table[33];
-
-
-
-
 
 void c_handler() {
     char* ploho = "vse ochen ploho\n\0";
@@ -116,34 +116,39 @@ void start_pit_interruptions() {
 
 }
 
+void check_mmap(struct multiboot_info* boot_info) {
+    /* Are mmap_* valid? */
+    if (CHECK_FLAG (boot_info->flags, 6))
+    {
+        multiboot_memory_map_t *mmap;
+
+        printf ("mmap_addr = 0x%x, mmap_length = 0x%x\n",
+                (unsigned) boot_info->mmap_addr, (unsigned) boot_info->mmap_length);
+        for (mmap = (multiboot_memory_map_t *) boot_info->mmap_addr;
+             (unsigned long) mmap < boot_info->mmap_addr + boot_info->mmap_length;
+             mmap = (multiboot_memory_map_t *) ((unsigned long) mmap
+                                                + mmap->size + sizeof (mmap->size)))
+            printf (" size = 0x%x, base_addr = 0x%x%x,"
+                            " length = 0x%x%x, type = 0x%x\n",
+                    (unsigned) mmap->size,
+                    mmap->addr >> 32,
+                    mmap->addr & 0xffffffff,
+                    mmap->len >> 32,
+                    mmap->len & 0xffffffff,
+                    (unsigned) mmap->type);
+    }
+}
+
 void main(uint32_t magic, struct multiboot_info* boot_info) {
 
     serial_setup();
 
     if (magic == 0x2BADB002) {
-        print_string("magic 0x2BADB002 is provided!");
+        print_string("magic 0x2BADB002 is provided!\n");
     }
 
-//    /* Are mmap_* valid? */
-//    if (CHECK_FLAG (boot_info->flags, 6))
-//    {
-//        multiboot_memory_map_t *mmap;
-//
-//        printf ("mmap_addr = 0x%x, mmap_length = 0x%x\n",
-//                (unsigned) boot_info->mmap_addr, (unsigned) boot_info->mmap_length);
-//        for (mmap = (multiboot_memory_map_t *) boot_info->mmap_addr;
-//             (unsigned long) mmap < boot_info->mmap_addr + boot_info->mmap_length;
-//             mmap = (multiboot_memory_map_t *) ((unsigned long) mmap
-//                                                + mmap->size + sizeof (mmap->size)))
-//            printf (" size = 0x%x, base_addr = 0x%x%x,"
-//                            " length = 0x%x%x, type = 0x%x\n",
-//                    (unsigned) mmap->size,
-//                    mmap->addr >> 32,
-//                    mmap->addr & 0xffffffff,
-//                    mmap->len >> 32,
-//                    mmap->len & 0xffffffff,
-//                    (unsigned) mmap->type);
-//    }
+    check_mmap(boot_info);
+
 
 	qemu_gdb_hang();
 
