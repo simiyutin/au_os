@@ -55,18 +55,25 @@ stack_top:
 
 1:
 	movl $stack_top, %esp
+
+	pushl $0
+    pushl %ebx // address of structure
+
+	pushl $0
+	pushl %eax // magic number
+
 	pushl %eax
 	call videomem_clrscr
 	popl %eax
 	cmpl $0x2badb002, %eax
-	je 1f
+	je 1f                               // if previous numbers are equal, jump to next label '1'
 
-	pushl $not_multiboot
+	pushl $not_multiboot //etogo ne budet
 	jmp fail
 
 1:
-	call check_long_mode
-	call setup_mapping
+	call check_long_mode                // stack is the same
+    call setup_mapping                  // stack is the same
 
 #define EFER_MSR	0xC0000080
 #define EFER_LM		(1 << 8)
@@ -91,13 +98,30 @@ stack_top:
 
 	lidt idt_ptr
 	lgdt gdt_ptr
+
 	movw $0x10, %ax
 	movw %ax, %ds
 	movw %ax, %es
 	movw %ax, %fs
 	movw %ax, %gs
-	movw %ax, %ss
-	ljmpl $0x08, $start64
+	movw %ax, %ss // after this moment check_stack is not running
+	              // phrase from oracle docs: "All interrupts are inhibited until after the execution of the next
+	              //                              instruction, after a movw into SS. Special actions and checks result
+	              //                                  from loading a segment register under Protected Mode."
+
+
+	ljmpl $0x08, $start64 // switching to protected mode
+
+check_stack:
+    popl %eax
+    cmpl $23, %eax
+    je 1f
+
+    pushl $my_own_fail
+    jmp fail
+1:
+    pushl $my_own_success
+    jmp fail
 
 
 #define PTE_PRESENT	(1 << 0)
@@ -216,10 +240,19 @@ enter_long_mode:
 	.asciz "Enter long mode...\n"
 enable_paging:
 	.asciz "Enable paging...\n"
+my_own_fail:
+    .asciz "fail!"
+my_own_success:
+    .asciz "success!"
 
 
 	.code64
+
 start64:
+
+    popq %rdi
+    popq %rsi
+
 	lgdt gdt_ptr64
 	movabsq $bootstrap_stack_top, %rax
 	movq %rax, %rsp

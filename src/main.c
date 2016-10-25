@@ -16,6 +16,9 @@ static void qemu_gdb_hang(void)
 #include "../inc/ioport.h"
 #include "../inc/memory.h"
 #include "../inc/ints.h"
+#include "../inc/multiboot.h"
+#include <stdlib.h>
+#include <stdio.h>
 
 
 // ports
@@ -26,6 +29,9 @@ static void qemu_gdb_hang(void)
 #define SLAVE_DATA 0xA1
 #define PIT_COMMAND 0x43
 #define PIT_DATA 0x40
+
+/* Check if the bit BIT in FLAGS is set. */
+#define CHECK_FLAG(flags,bit)   ((flags) & (1 << (bit)))
 
 //handlers
 extern uint64_t table[];
@@ -134,7 +140,32 @@ void start_pit_interruptions() {
 
 }
 
-void main(void) {
+void main(uint32_t magic, struct multiboot_info* boot_info) {
+
+    if (magic == 0x2BADB002) {
+        print_string("magic 0x2BADB002 is provided!");
+    }
+
+//    /* Are mmap_* valid? */
+//    if (CHECK_FLAG (boot_info->flags, 6))
+//    {
+//        multiboot_memory_map_t *mmap;
+//
+//        printf ("mmap_addr = 0x%x, mmap_length = 0x%x\n",
+//                (unsigned) boot_info->mmap_addr, (unsigned) boot_info->mmap_length);
+//        for (mmap = (multiboot_memory_map_t *) boot_info->mmap_addr;
+//             (unsigned long) mmap < boot_info->mmap_addr + boot_info->mmap_length;
+//             mmap = (multiboot_memory_map_t *) ((unsigned long) mmap
+//                                                + mmap->size + sizeof (mmap->size)))
+//            printf (" size = 0x%x, base_addr = 0x%x%x,"
+//                            " length = 0x%x%x, type = 0x%x\n",
+//                    (unsigned) mmap->size,
+//                    mmap->addr >> 32,
+//                    mmap->addr & 0xffffffff,
+//                    mmap->len >> 32,
+//                    mmap->len & 0xffffffff,
+//                    (unsigned) mmap->type);
+//    }
 
 	qemu_gdb_hang();
 
