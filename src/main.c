@@ -12,6 +12,7 @@ static void qemu_gdb_hang(void)
 #include <ioport.h>
 #include <memory.h>
 #include <serial.h>
+#include <allocator.h>
 //todo for clion
 #include "../inc/desc.h"
 #include "../inc/ioport.h"
@@ -20,8 +21,8 @@ static void qemu_gdb_hang(void)
 #include "../inc/multiboot.h"
 #include "../inc/print.h"
 #include "../inc/serial.h"
+#include "../inc/allocator.h"
 #include <stdlib.h>
-//#include <stdio.h>
 
 
 // ports
@@ -117,8 +118,7 @@ void start_pit_interruptions() {
 
 }
 
-void check_mmap(struct multiboot_info* boot_info) {
-    /* Are mmap_* valid? */
+void setup_mmap_from_multiboot(struct multiboot_info *boot_info) {
     if (CHECK_FLAG (boot_info->flags, 6))
     {
         multiboot_memory_map_t *mmap;
@@ -137,7 +137,6 @@ void check_mmap(struct multiboot_info* boot_info) {
              )
         {
 
-
             printf (" size = 0x%x, base_addr = 0x%x%x,"
                             " length = 0x%x%x, type = 0x%x\n",
                     (unsigned) mmap->size,
@@ -146,6 +145,10 @@ void check_mmap(struct multiboot_info* boot_info) {
                     mmap->len >> 32,
                     mmap->len & 0xffffffff,
                     (unsigned) mmap->type);
+
+            enum TYPE type = (mmap->type == 1) ? (FREE) : (RESERVED);
+            add_region(mmap->addr, mmap->addr + mmap->len - 1, type);
+
         }
 
     }
@@ -153,24 +156,17 @@ void check_mmap(struct multiboot_info* boot_info) {
 
 void main(uint32_t magic, struct multiboot_info* boot_info) {
 
-
-
     serial_setup();
 
     if (magic == 0x2BADB002) {
         print_string("magic 0x2BADB002 is provided!\n");
     }
 
-    check_mmap(boot_info);
-    printf("text_phys_begin = 0x%x\n", text_phys_begin);
-    printf("bss_phys_end = 0x%x\n", bss_phys_end);
+    setup_mmap_from_multiboot(boot_info);
 
-    uint64_t kernel_start = (uint64_t) text_phys_begin;
-    uint64_t kernel_length = (uint64_t) bss_phys_end - kernel_start;
+    reserve_region((uint64_t) text_phys_begin, (uint64_t) bss_phys_end);
 
-    printf("kernel_start = 0x%x\n", kernel_start);
-    printf("kernel_length = 0x%x\n", kernel_length);
-
+    //print_my_map();
 
     qemu_gdb_hang();
 
@@ -183,7 +179,8 @@ void main(uint32_t magic, struct multiboot_info* boot_info) {
     enable_ints();
 
     start_pit_interruptions();
-    out8(MASTER_DATA, 0b11111110);
+    //shut up
+    //out8(MASTER_DATA, 0b11111110);
 
     while (1);
 }
