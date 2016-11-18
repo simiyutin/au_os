@@ -13,6 +13,7 @@ static void qemu_gdb_hang(void)
 #include <memory.h>
 #include <serial.h>
 #include <allocator.h>
+#include <concurrency.h>
 //todo for clion
 #include "../inc/desc.h"
 #include "../inc/ioport.h"
@@ -23,6 +24,8 @@ static void qemu_gdb_hang(void)
 #include "../inc/serial.h"
 #include "../inc/allocator.h"
 #include <stdlib.h>
+#include "../inc/concurrency.h"
+
 
 
 // ports
@@ -152,6 +155,19 @@ void setup_mmap_from_multiboot(struct multiboot_info *boot_info) {
         }
 
     }
+
+
+}
+
+void mutex_test(){
+    static struct spinlock ticket_handler;
+    lock(&ticket_handler);
+    lock(&ticket_handler);
+    lock(&ticket_handler);
+    lock(&ticket_handler);
+    lock(&ticket_handler);
+
+    unlock(&ticket_handler);
 }
 
 void main(uint32_t magic, struct multiboot_info* boot_info) {
@@ -165,6 +181,9 @@ void main(uint32_t magic, struct multiboot_info* boot_info) {
     setup_mmap_from_multiboot(boot_info);
 
     reserve_region((uint64_t) text_phys_begin, (uint64_t) bss_phys_end);
+
+    mutex_test();
+
 
     //print_my_map();
 

@@ -10,6 +10,6 @@ set(SOURCE_FILES
     inc/memory.h
     src/bootstrap.S
     src/main.c
-    src/videomem.S inc/multiboot.h)
+    src/videomem.S inc/multiboot.h inc/allocator.h src/allocator.c inc/concurrency.h src/concurrency.c)
 
 add_executable(kernel ${SOURCE_FILES})
