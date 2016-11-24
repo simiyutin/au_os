@@ -18,6 +18,7 @@
 #include "../inc/serial.h"
 #include "../inc/time.h"
 #include "../inc/balloc.h"
+#include "../inc/concurrency.h"
 
 static void qemu_gdb_hang(void)
 {
@@ -142,9 +143,16 @@ static void test_buddy(void)
 	}
 }
 
+void mutex_test() {
+    static struct spinlock ticket_handler;
+    lock(&ticket_handler);
+    lock(&ticket_handler);
+}
+
 void main(void *bootstrap_info)
 {
 	qemu_gdb_hang();
+
 
 	serial_setup();
 	ints_setup();
