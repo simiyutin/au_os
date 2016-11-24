@@ -174,15 +174,19 @@ void main(uint32_t magic, struct multiboot_info* boot_info) {
 
     serial_setup();
 
+
+
     if (magic == 0x2BADB002) {
         print_string("magic 0x2BADB002 is provided!\n");
     }
+
+    mutex_test();
 
     setup_mmap_from_multiboot(boot_info);
 
     reserve_region((uint64_t) text_phys_begin, (uint64_t) bss_phys_end);
 
-    mutex_test();
+
 
 
     //print_my_map();

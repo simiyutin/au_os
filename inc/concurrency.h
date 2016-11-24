@@ -6,8 +6,9 @@
 #ifndef SRC_CONCURRENCY_H
 #define SRC_CONCURRENCY_H
 struct spinlock {
-    atomic_uint next;
-    atomic_uint current;
+//    atomic_uint next;
+//    atomic_uint current;
+    atomic_int locked;
 };
 
 void lock(struct spinlock*);
