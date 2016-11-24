@@ -1,3 +1,24 @@
+#include <serial.h>
+#include <memory.h>
+#include <balloc.h>
+#include <paging.h>
+#include <debug.h>
+#include <alloc.h>
+#include <print.h>
+#include <ints.h>
+#include <time.h>
+#include "../inc/alloc.h"
+#include "../inc/debug.h"
+#include "../inc/ints.h"
+#include "../inc/print.h"
+#include "../inc/memory.h"
+#include "../inc/paging.h"
+#include "../inc/list.h"
+#include "../inc/kernel.h"
+#include "../inc/serial.h"
+#include "../inc/time.h"
+#include "../inc/balloc.h"
+
 static void qemu_gdb_hang(void)
 {
 #ifdef DEBUG
@@ -7,203 +28,140 @@ static void qemu_gdb_hang(void)
 #endif
 }
 
-#include <desc.h>
-#include <ints.h>
-#include <ioport.h>
-#include <memory.h>
-#include <serial.h>
-#include <allocator.h>
-#include <concurrency.h>
-//todo for clion
-#include "../inc/desc.h"
-#include "../inc/ioport.h"
-#include "../inc/memory.h"
-#include "../inc/ints.h"
-#include "../inc/multiboot.h"
-#include "../inc/print.h"
-#include "../inc/serial.h"
-#include "../inc/allocator.h"
-#include <stdlib.h>
-#include "../inc/concurrency.h"
+static void test_kmap(void)
+{
+	const size_t count = 1024;
+	struct page **pages = mem_alloc(sizeof(*pages) * count);
+	size_t i;
 
+	BUG_ON(!pages);
+	for (i = 0; i != count; ++i) {
+		pages[i] = __page_alloc(0);
+		if (!pages[i])
+			break;
+	}
 
+	char *ptr = kmap(pages, i);
 
-// ports
+	BUG_ON(!ptr);
+	BUG_ON((uintptr_t)ptr < HIGHER_BASE);
 
-#define MASTER_COMMAND 0x20
-#define MASTER_DATA 0x21
-#define SLAVE_COMMAND 0xA0
-#define SLAVE_DATA 0xA1
-#define PIT_COMMAND 0x43
-#define PIT_DATA 0x40
+	for (size_t j = 0; j != i * PAGE_SIZE; ++j)
+		ptr[i] = 13;
 
-/* Check if the bit BIT in FLAGS is set. */
-#define CHECK_FLAG(flags,bit)   ((flags) & (1 << (bit)))
+	for (size_t j = 0; j != i * PAGE_SIZE; ++j)
+		BUG_ON(ptr[i] != 13);
 
-//handlers
-extern uint64_t table[];
-
-extern char text_phys_begin[];
-extern char bss_phys_end[];
-
-
-
-static struct idt_entry idt_table[33];
-
-void c_handler() {
-    char* ploho = "vse ochen ploho\n\0";
-    print_string(ploho);
+	kunmap(ptr);
+	mem_free(pages);
 }
 
-void c_handler2() {
-    char* horosho = "vse ochen horosho\n\0";
-    print_string(horosho);
+static void test_alloc(void)
+{
+	struct list_head head;
+	unsigned long count = 0;
 
-    uint8_t undirected_eoi = 0b00100000;
-    out8(MASTER_COMMAND, undirected_eoi);
+	list_init(&head);
+	while (1) {
+		struct list_head *node = mem_alloc(sizeof(*node));
+
+		if (!node)
+			break;
+		BUG_ON((uintptr_t)node < HIGHER_BASE);
+		++count;
+		list_add(node, &head);
+	}
+
+	printf("Allocated %lu bytes\n", count * sizeof(head));
+
+	while (!list_empty(&head)) {
+		struct list_head *node = head.next;
+
+		BUG_ON((uintptr_t)node < HIGHER_BASE);
+		list_del(node);
+		mem_free(node);
+	}
+
+	mem_alloc_shrink();
 }
 
-void init_idt() {
+static void test_slab(void)
+{
+	struct list_head head;
+	struct mem_cache cache;
+	unsigned long count = 0;
 
-    for (int i = 0; i < 33; ++i) {
+	list_init(&head);
+	mem_cache_setup(&cache, sizeof(head), sizeof(head));
+	while (1) {
+		struct list_head *node = mem_cache_alloc(&cache);
 
-        uint64_t handler_address = (uint64_t) table[i];
-        uint8_t trap_gate_flags = 0b10001111;
-        uint16_t handler_last_quarter = (uint16_t)(handler_address & 0xffff);
-        uint16_t handler_second_quarter = (uint16_t)((handler_address & 0xffff0000)>>16);
-        uint32_t handler_first_half = (uint32_t)((handler_address & 0xffffffff00000000)>>32);
+		if (!node)
+			break;
+		BUG_ON((uintptr_t)node < HIGHER_BASE);
+		++count;
+		list_add(node, &head);
+	}
 
-        idt_table[i].handler_last_quarter = handler_last_quarter;
-        idt_table[i].seg_sel = KERNEL_CS;
-        idt_table[i].flags = trap_gate_flags;
-        idt_table[i].handler_second_quarter = handler_second_quarter;
-        idt_table[i].handler_first_half = handler_first_half;
+	printf("Allocated %lu bytes\n", count * sizeof(head));
 
-    }
+	while (!list_empty(&head)) {
+		struct list_head *node = head.next;
 
-    struct desc_table_ptr ptr = {sizeof(idt_table) - 1, (uint64_t) &idt_table};
-    write_idtr(&ptr);
+		BUG_ON((uintptr_t)node < HIGHER_BASE);
+		list_del(node);
+		mem_cache_free(&cache, node);
+	}
+
+	mem_cache_release(&cache);
 }
 
-void init_interrupt_controller() {
+static void test_buddy(void)
+{
+	struct list_head head;
+	unsigned long count = 0;
 
-    uint8_t command = 0b00010001;
-    uint8_t first_byte_idt_entry_for_master = 32;
-    uint8_t first_idt_entry_for_slave = 40;
-    uint8_t second_byte = 0b00000100;
-    uint8_t second_byte_slave = 2;
-    uint8_t third_byte = 0b00000001;
+	list_init(&head);
+	while (1) {
+		struct page *page = __page_alloc(0);
 
-    out8(MASTER_COMMAND, command);
-    out8(SLAVE_COMMAND, command);
+		if (!page)
+			break;
+		++count;
+		list_add(&page->ll, &head);
+	}
 
-    out8(MASTER_DATA, first_byte_idt_entry_for_master);
-    out8(SLAVE_DATA, first_idt_entry_for_slave);
+	printf("Allocated %lu pages\n", count);
 
-    out8(MASTER_DATA, second_byte);
-    out8(SLAVE_DATA, second_byte_slave);
+	while (!list_empty(&head)) {
+		struct list_head *node = head.next;
+		struct page *page = CONTAINER_OF(node, struct page, ll);
 
-    out8(MASTER_DATA, third_byte);
-    out8(SLAVE_DATA, third_byte);
-
-    out8(MASTER_DATA, 0xff);
-    out8(SLAVE_DATA, 0xff);
-
+		list_del(&page->ll);
+		__page_free(page, 0);
+	}
 }
 
-void start_pit_interruptions() {
+void main(void *bootstrap_info)
+{
+	qemu_gdb_hang();
 
-    uint8_t word = 0b00110100;
-    out8(PIT_COMMAND, word);
+	serial_setup();
+	ints_setup();
+	time_setup();
+	balloc_setup(bootstrap_info);
+	paging_setup();
+	page_alloc_setup();
+	mem_alloc_setup();
+	kmap_setup();
+	enable_ints();
 
-    out8(PIT_DATA, 0xff);
-    out8(PIT_DATA, 0xff);
+	printf("Tests Begin\n");
+	test_buddy();
+	test_slab();
+	test_alloc();
+	test_kmap();
+	printf("Tests Finished\n");
 
-}
-
-void setup_mmap_from_multiboot(struct multiboot_info *boot_info) {
-    if (CHECK_FLAG (boot_info->flags, 6))
-    {
-        multiboot_memory_map_t *mmap;
-
-        printf ("mmap_addr = 0x%x, mmap_length = 0x%x\n",
-                (unsigned) boot_info->mmap_addr, (unsigned) boot_info->mmap_length);
-
-        for (
-
-             mmap = (multiboot_memory_map_t *) boot_info->mmap_addr;
-
-             (unsigned long) mmap < boot_info->mmap_addr + boot_info->mmap_length;
-
-             mmap = (multiboot_memory_map_t *) ((unsigned long) mmap + mmap->size + sizeof (mmap->size))
-
-             )
-        {
-
-            printf (" size = 0x%x, base_addr = 0x%x%x,"
-                            " length = 0x%x%x, type = 0x%x\n",
-                    (unsigned) mmap->size,
-                    mmap->addr >> 32,
-                    mmap->addr & 0xffffffff,
-                    mmap->len >> 32,
-                    mmap->len & 0xffffffff,
-                    (unsigned) mmap->type);
-
-            enum TYPE type = (mmap->type == 1) ? (FREE) : (RESERVED);
-            add_region(mmap->addr, mmap->addr + mmap->len - 1, type);
-
-        }
-
-    }
-
-
-}
-
-void mutex_test(){
-    static struct spinlock ticket_handler;
-    lock(&ticket_handler);
-    lock(&ticket_handler);
-    lock(&ticket_handler);
-    lock(&ticket_handler);
-    lock(&ticket_handler);
-
-    unlock(&ticket_handler);
-}
-
-void main(uint32_t magic, struct multiboot_info* boot_info) {
-
-    serial_setup();
-
-
-
-    if (magic == 0x2BADB002) {
-        print_string("magic 0x2BADB002 is provided!\n");
-    }
-
-    mutex_test();
-
-    setup_mmap_from_multiboot(boot_info);
-
-    reserve_region((uint64_t) text_phys_begin, (uint64_t) bss_phys_end);
-
-
-
-
-    //print_my_map();
-
-    qemu_gdb_hang();
-
-    init_idt();
-
-    // на нулевой ноге мастера ждем прерывание и отобразим его в 32 запись idt
-    init_interrupt_controller();
-
-    // разрешаем процессору принимать masked interruptions
-    enable_ints();
-
-    start_pit_interruptions();
-    //shut up
-    //out8(MASTER_DATA, 0b11111110);
-
-    while (1);
+	while (1);
 }

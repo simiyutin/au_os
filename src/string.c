@@ -17,3 +17,12 @@ void *memcpy(void *dst, const void *src, size_t size)
 		*to++ = *from++;
 	return dst;
 }
+
+void *memset(void *dst, int fill, size_t size)
+{
+	char *to = dst;
+
+	while (size--)
+		*to++ = fill;
+	return dst;
+}

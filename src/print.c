@@ -3,9 +3,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <serial.h>
-#include "../inc/print.h"
-#include "../inc/stdlib.h"
-#include "../inc/serial.h"
+
 
 struct print_ctx {
 	int (*out)(struct print_ctx *ctx, const char *buf, int size);
@@ -121,7 +119,7 @@ static int decode_format(const char **fmt_ptr)
 
 static int print_number(struct print_ctx *ctx, va_list args, int type)
 {
-	const int base = type & FMT_HEX ? 16 : 10;
+	const int base = (type & FMT_HEX) ? 16 : ((type & FMT_OCT) ? 8 : 10);
 	char buf[64];
 
 	if (type & FMT_UNSIGNED) {

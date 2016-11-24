@@ -1,11 +1,10 @@
-#include <stdint.h>
+#ifndef __SERIAL_H__
+#define __SERIAL_H__
 
-#ifndef SRC_SERIAL_H
-#define SRC_SERIAL_H
+#include <stddef.h>
 
 void serial_setup(void);
 void serial_putchar(int c);
-void serial_write(const char *buf, uint32_t size);
-void print_string(const char *);
+void serial_write(const char *buf, size_t size);
 
-#endif //SRC_SERIAL_H
+#endif /*__SERIAL_H__*/
