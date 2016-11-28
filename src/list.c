@@ -1,4 +1,6 @@
 #include <list.h>
+#include <stddef.h>
+#include "./../inc/list.h"
 
 void list_init(struct list_head *head)
 { head->next = head->prev = head; }

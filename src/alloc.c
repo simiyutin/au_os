@@ -3,6 +3,14 @@
 #include <string.h>
 #include <alloc.h>
 #include <debug.h>
+#include "../inc/memory.h"
+#include "../inc/debug.h"
+#include "../inc/print.h"
+#include "../inc/ints.h"
+#include "../inc/list.h"
+#include "../inc/kernel.h"
+#include "../inc/alloc.h"
+#include "../inc/concurrency.h"
 
 
 #define WORD_SZ		sizeof(unsigned long long)
@@ -274,8 +282,10 @@ void *mem_cache_alloc(struct mem_cache *cache)
 
 	struct mem_pool *pool = mem_pool_create(cache);
 
-	if (!pool)
+	if (!pool) {
 		return 0;
+	}
+
 
 	void *data = mem_pool_alloc(cache, pool);
 

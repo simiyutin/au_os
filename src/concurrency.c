@@ -6,6 +6,8 @@
 #define LOCKED 1
 #define UNLOCKED 0
 
+static struct spinlock ticket_handler;
+
 void lock(struct spinlock* lock){
     //todo можно и так будет если что
 //    const unsigned ticket = atomic_fetch_add_explicit(&lock ->next, 1, memory_order_relaxed);
@@ -20,3 +22,14 @@ void unlock(struct spinlock* lock) {
     atomic_store_explicit(&lock -> locked, UNLOCKED, memory_order_release);
 }
 
+void lock_default(){
+    lock(&ticket_handler);
+}
+
+void unlock_default(){
+    unlock(&ticket_handler);
+}
+
+int thread_create() {
+    return 0;
+}

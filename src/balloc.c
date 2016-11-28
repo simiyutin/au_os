@@ -1,6 +1,13 @@
 #include <balloc.h>
 #include <memory.h>
 #include <debug.h>
+#include <stdint.h>
+#include "../inc/balloc.h"
+#include "../inc/list.h"
+#include "../inc/rbtree.h"
+#include "../inc/debug.h"
+#include "../inc/ints.h"
+#include "../inc/print.h"
 
 
 struct mboot_info {

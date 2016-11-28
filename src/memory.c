@@ -2,6 +2,16 @@
 #include <string.h>
 #include <balloc.h>
 #include <debug.h>
+#include <stdint.h>
+#include "../inc/list.h"
+#include "../inc/memory.h"
+#include "../inc/kernel.h"
+#include "../inc/debug.h"
+#include "../inc/print.h"
+#include "../inc/ints.h"
+#include "../inc/rbtree.h"
+#include "../inc/balloc.h"
+#include "../inc/concurrency.h"
 
 #define PAGE_FREE_OFFS	8
 #define PAGE_FREE_MASK	(1ul << PAGE_FREE_OFFS)
@@ -263,8 +273,9 @@ static struct page *page_alloc_zone(struct page_alloc_zone *zone, int order)
 
 struct page *__page_alloc(int order)
 {
-	if (order > MAX_ORDER)
+	if (order > MAX_ORDER){
 		return 0;
+	}
 
 	struct list_head *head = &page_alloc_zones;
 	struct list_head *ptr;
@@ -274,10 +285,11 @@ struct page *__page_alloc(int order)
 					struct page_alloc_zone, ll);
 		struct page *page = page_alloc_zone(zone, order);
 
-		if (page)
+		if (page) {
 			return page;
-	}
+		}
 
+	}
 	return 0;
 }
 
@@ -355,8 +367,9 @@ void page_free(uintptr_t addr, int order)
 
 void __page_free(struct page *page, int order)
 {
-	if (!page)
+	if (!page){
 		return;
+	}
 
 	struct page_alloc_zone *zone = page_zone(page);
 

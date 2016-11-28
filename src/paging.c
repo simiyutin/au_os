@@ -5,6 +5,15 @@
 #include <balloc.h>
 #include <debug.h>
 #include <alloc.h>
+#include "../inc/memory.h"
+#include "../inc/balloc.h"
+#include "../inc/debug.h"
+#include "../inc/print.h"
+#include "../inc/ints.h"
+#include "../inc/paging.h"
+#include "../inc/list.h"
+#include "../inc/kernel.h"
+#include "../inc/alloc.h"
 
 
 struct page_pool {

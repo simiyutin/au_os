@@ -124,6 +124,7 @@ static void test_buddy(void)
 
 	list_init(&head);
 	while (1) {
+
 		struct page *page = __page_alloc(0);
 
 		if (!page)
@@ -144,7 +145,7 @@ static void test_buddy(void)
 }
 
 void mutex_test() {
-    static struct spinlock ticket_handler;
+	static struct spinlock ticket_handler;
     lock(&ticket_handler);
     lock(&ticket_handler);
 }
@@ -157,18 +158,24 @@ void main(void *bootstrap_info)
 	serial_setup();
 	ints_setup();
 	time_setup();
+
 	balloc_setup(bootstrap_info);
 	paging_setup();
 	page_alloc_setup();
 	mem_alloc_setup();
 	kmap_setup();
+
 	enable_ints();
 
 	printf("Tests Begin\n");
+	//todo разные мьютексы запилить
+	//todo кстати, может быть еще и барьеры
 	test_buddy();
 	test_slab();
-	test_alloc();
-	test_kmap();
+
+
+	test_alloc(); //todo extra
+	test_kmap(); //todo extra
 	printf("Tests Finished\n");
 
 	while (1);
