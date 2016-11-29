@@ -18,6 +18,8 @@
 #define MIN_POOL_OBJS	8
 #define PAGE_CACHE_BIT	0
 
+static struct spinlock memory_lock;
+
 
 struct mem_pool {
 	struct list_head ll;
@@ -360,20 +362,28 @@ void mem_alloc_shrink(void)
 
 void *mem_alloc(size_t size)
 {
+    lock(&memory_lock);
 	struct mem_cache *cache = mem_pool_lookup(size);
 
-	if (cache)
-		return mem_cache_alloc(cache);
+	if (cache) {
+        unlock(&memory_lock);
+        return mem_cache_alloc(cache);
+    }
+
 
 	const int order = mem_order_calculate(size);
 	struct page *page = __page_alloc(order);
 
-	if (!page)
-		return 0;
+	if (!page) {
+        unlock(&memory_lock);
+        return 0;
+    }
+
 
 	page_clear_bit(page, PAGE_CACHE_BIT);
 	page->u.order = order;
 
+    unlock(&memory_lock);
 	return va(page_addr(page));
 }
 
@@ -382,10 +392,13 @@ void mem_free(void *ptr)
 	if (!ptr)
 		return;
 
+    lock(&memory_lock);
+
 	struct page *page = addr_page(pa(ptr) & ~(uintptr_t)PAGE_MASK);
 
 	if (page_test_bit(page, PAGE_CACHE_BIT)) {
 		mem_cache_free(page->u.cache, ptr);
+        unlock(&memory_lock);
 		return;
 	}
 
@@ -395,6 +408,7 @@ void mem_free(void *ptr)
 	page_clear_bit(page, PAGE_CACHE_BIT);
 	page->u.order = 0;
 	page_free((~mask & pa(ptr)), order);
+    unlock(&memory_lock);
 }
 
 void *mem_realloc(void *ptr, size_t size)

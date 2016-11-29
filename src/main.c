@@ -144,11 +144,12 @@ static void test_buddy(void)
 	}
 }
 
-void mutex_test() {
+void deadlock_test() {
 	static struct spinlock ticket_handler;
     lock(&ticket_handler);
     lock(&ticket_handler);
 }
+
 
 void main(void *bootstrap_info)
 {
@@ -168,8 +169,6 @@ void main(void *bootstrap_info)
 	enable_ints();
 
 	printf("Tests Begin\n");
-	//todo разные мьютексы запилить
-	//todo кстати, может быть еще и барьеры
 	test_buddy();
 	test_slab();
 
