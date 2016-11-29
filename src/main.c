@@ -173,8 +173,8 @@ void main(void *bootstrap_info)
 	test_slab();
 
 
-	test_alloc(); //todo extra
-	test_kmap(); //todo extra
+	test_alloc();
+	test_kmap();
 	printf("Tests Finished\n");
 
 	while (1);
