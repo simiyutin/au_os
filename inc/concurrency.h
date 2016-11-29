@@ -13,6 +13,8 @@ void lock(struct spinlock*);
 void unlock(struct spinlock*);
 
 // семантика должна быть такая - создаем поток и запускаяем там  переданную функцию?
-int thread_create();
+int thread_create(void (*function)(void *), void *argument);
+
+
 
 #endif //SRC_CONCURRENCY_H

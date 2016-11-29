@@ -1,6 +1,7 @@
 #include <backtrace.h>
 #include <memory.h>
 #include <print.h>
+#include "../inc/memory.h"
 
 #define RBP(x)	__asm__ ("movq %%rbp, %0" : "=rm"(x))
 #define RSP(x)	__asm__ ("movq %%rsp, %0" : "=rm"(x))

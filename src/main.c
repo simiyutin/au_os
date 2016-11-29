@@ -150,11 +150,16 @@ void deadlock_test() {
     lock(&ticket_handler);
 }
 
+void test_threadfunc(void * arg) {
+    printf("I AM CALLED BITCH MUAHAHA\n");
+    char * textarg = (char *) arg;
+    printf(textarg);
+}
+
 
 void main(void *bootstrap_info)
 {
 	qemu_gdb_hang();
-
 
 	serial_setup();
 	ints_setup();
@@ -167,6 +172,9 @@ void main(void *bootstrap_info)
 	kmap_setup();
 
 	enable_ints();
+
+    thread_create(test_threadfunc, (void *)"thihs was passed as argument from previous thread\n");
+
 
 	printf("Tests Begin\n");
 	test_buddy();

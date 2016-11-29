@@ -4,6 +4,7 @@
 #include <desc.h>
 #include <print.h>
 #include <backtrace.h>
+#include "../inc/ints.h"
 
 #define IDT_PRESENT	((uint64_t)1 << 47)
 #define IDT_INT_GATE	((uint64_t)14 << 40)
