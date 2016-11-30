@@ -2,8 +2,10 @@
 #include <stddef.h>
 #include "./../inc/list.h"
 
+
 void list_init(struct list_head *head)
 { head->next = head->prev = head; }
+
 
 static void list_insert(struct list_head *new, struct list_head *prev,
 			struct list_head *next)

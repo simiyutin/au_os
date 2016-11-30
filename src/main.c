@@ -20,170 +20,164 @@
 #include "../inc/balloc.h"
 #include "../inc/concurrency.h"
 
-static void qemu_gdb_hang(void)
-{
+static void qemu_gdb_hang(void) {
 #ifdef DEBUG
-	static volatile int wait = 1;
+    static volatile int wait = 1;
 
-	while (wait);
+    while (wait);
 #endif
 }
 
-static void test_kmap(void)
-{
-	const size_t count = 1024;
-	struct page **pages = mem_alloc(sizeof(*pages) * count);
-	size_t i;
+static void test_kmap(void) {
+    const size_t count = 1024;
+    struct page **pages = mem_alloc(sizeof(*pages) * count);
+    size_t i;
 
-	BUG_ON(!pages);
-	for (i = 0; i != count; ++i) {
-		pages[i] = __page_alloc(0);
-		if (!pages[i])
-			break;
-	}
+    BUG_ON(!pages);
+    for (i = 0; i != count; ++i) {
+        pages[i] = __page_alloc(0);
+        if (!pages[i])
+            break;
+    }
 
-	char *ptr = kmap(pages, i);
+    char *ptr = kmap(pages, i);
 
-	BUG_ON(!ptr);
-	BUG_ON((uintptr_t)ptr < HIGHER_BASE);
+    BUG_ON(!ptr);
+    BUG_ON((uintptr_t) ptr < HIGHER_BASE);
 
-	for (size_t j = 0; j != i * PAGE_SIZE; ++j)
-		ptr[i] = 13;
+    for (size_t j = 0; j != i * PAGE_SIZE; ++j)
+        ptr[i] = 13;
 
-	for (size_t j = 0; j != i * PAGE_SIZE; ++j)
-		BUG_ON(ptr[i] != 13);
+    for (size_t j = 0; j != i * PAGE_SIZE; ++j)
+        BUG_ON(ptr[i] != 13);
 
-	kunmap(ptr);
-	mem_free(pages);
+    kunmap(ptr);
+    mem_free(pages);
 }
 
-static void test_alloc(void)
-{
-	struct list_head head;
-	unsigned long count = 0;
+static void test_alloc(void) {
+    struct list_head head;
+    unsigned long count = 0;
 
-	list_init(&head);
-	while (1) {
-		struct list_head *node = mem_alloc(sizeof(*node));
+    list_init(&head);
+    while (1) {
+        struct list_head *node = mem_alloc(sizeof(*node));
 
-		if (!node)
-			break;
-		BUG_ON((uintptr_t)node < HIGHER_BASE);
-		++count;
-		list_add(node, &head);
-	}
+        if (!node)
+            break;
+        BUG_ON((uintptr_t) node < HIGHER_BASE);
+        ++count;
+        list_add(node, &head);
+    }
 
-	printf("Allocated %lu bytes\n", count * sizeof(head));
+    printf("Allocated %lu bytes\n", count * sizeof(head));
 
-	while (!list_empty(&head)) {
-		struct list_head *node = head.next;
+    while (!list_empty(&head)) {
+        struct list_head *node = head.next;
 
-		BUG_ON((uintptr_t)node < HIGHER_BASE);
-		list_del(node);
-		mem_free(node);
-	}
+        BUG_ON((uintptr_t) node < HIGHER_BASE);
+        list_del(node);
+        mem_free(node);
+    }
 
-	mem_alloc_shrink();
+    mem_alloc_shrink();
 }
 
-static void test_slab(void)
-{
-	struct list_head head;
-	struct mem_cache cache;
-	unsigned long count = 0;
+static void test_slab(void) {
+    struct list_head head;
+    struct mem_cache cache;
+    unsigned long count = 0;
 
-	list_init(&head);
-	mem_cache_setup(&cache, sizeof(head), sizeof(head));
-	while (1) {
-		struct list_head *node = mem_cache_alloc(&cache);
+    list_init(&head);
+    mem_cache_setup(&cache, sizeof(head), sizeof(head));
+    while (1) {
+        struct list_head *node = mem_cache_alloc(&cache);
 
-		if (!node)
-			break;
-		BUG_ON((uintptr_t)node < HIGHER_BASE);
-		++count;
-		list_add(node, &head);
-	}
+        if (!node)
+            break;
+        BUG_ON((uintptr_t) node < HIGHER_BASE);
+        ++count;
+        list_add(node, &head);
+    }
 
-	printf("Allocated %lu bytes\n", count * sizeof(head));
+    printf("Allocated %lu bytes\n", count * sizeof(head));
 
-	while (!list_empty(&head)) {
-		struct list_head *node = head.next;
+    while (!list_empty(&head)) {
+        struct list_head *node = head.next;
 
-		BUG_ON((uintptr_t)node < HIGHER_BASE);
-		list_del(node);
-		mem_cache_free(&cache, node);
-	}
+        BUG_ON((uintptr_t) node < HIGHER_BASE);
+        list_del(node);
+        mem_cache_free(&cache, node);
+    }
 
-	mem_cache_release(&cache);
+    mem_cache_release(&cache);
 }
 
-static void test_buddy(void)
-{
-	struct list_head head;
-	unsigned long count = 0;
+static void test_buddy(void) {
+    struct list_head head;
+    unsigned long count = 0;
 
-	list_init(&head);
-	while (1) {
+    list_init(&head);
+    while (1) {
 
-		struct page *page = __page_alloc(0);
+        struct page *page = __page_alloc(0);
 
-		if (!page)
-			break;
-		++count;
-		list_add(&page->ll, &head);
-	}
+        if (!page)
+            break;
+        ++count;
+        list_add(&page->ll, &head);
+    }
 
-	printf("Allocated %lu pages\n", count);
+    printf("Allocated %lu pages\n", count);
 
-	while (!list_empty(&head)) {
-		struct list_head *node = head.next;
-		struct page *page = CONTAINER_OF(node, struct page, ll);
+    while (!list_empty(&head)) {
+        struct list_head *node = head.next;
+        struct page *page = CONTAINER_OF(node, struct page, ll);
 
-		list_del(&page->ll);
-		__page_free(page, 0);
-	}
+        list_del(&page->ll);
+        __page_free(page, 0);
+    }
 }
 
 void deadlock_test() {
-	static struct spinlock ticket_handler;
+    static struct spinlock ticket_handler;
     lock(&ticket_handler);
     lock(&ticket_handler);
 }
 
-void test_threadfunc(void * arg) {
+void test_threadfunc(void *arg) {
     printf("I AM CALLED MUAHAHA\n");
-    char * textarg = (char *) arg;
+    char *textarg = (char *) arg;
     printf(textarg);
 }
 
 
-void main(void *bootstrap_info)
-{
-	qemu_gdb_hang();
+void main(void *bootstrap_info) {
+    qemu_gdb_hang();
 
-	serial_setup();
-	ints_setup();
-	time_setup();
+    serial_setup();
+    ints_setup();
+    time_setup();
 
-	balloc_setup(bootstrap_info);
-	paging_setup();
-	page_alloc_setup();
-	mem_alloc_setup();
-	kmap_setup();
+    balloc_setup(bootstrap_info);
+    paging_setup();
+    page_alloc_setup();
+    mem_alloc_setup();
+    kmap_setup();
 
-	enable_ints();
+    enable_ints();
 
-    thread_create(test_threadfunc, (void *)"this was passed as argument from previous thread\n");
+    //thread_create(test_threadfunc, (void *)"this was passed as argument from previous thread\n");
 
 
-	printf("Tests Begin\n");
-	test_buddy();
-	test_slab();
+    printf("Tests Begin\n");
+    test_buddy();
+    test_slab();
 
-	test_alloc();
+    test_alloc();
 
-	test_kmap();
-	printf("Tests Finished\n");
+    test_kmap();
+    printf("Tests Finished\n");
 
-	while (1);
+    while (1);
 }

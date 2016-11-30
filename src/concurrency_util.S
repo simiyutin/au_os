@@ -11,7 +11,7 @@ switch_thread:
     pushq %r15
     pushfq
 
-    //movq %rsp, (%rdi)
+    movq %rsp, (%rdi)
     movq %rsi, %rsp
 
     popfq

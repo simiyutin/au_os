@@ -2,18 +2,22 @@
 <module type="CPP_MODULE" version="4">
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
-      <sourceFolder url="file://$MODULE_DIR$/src/bootstrap.S" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/allocator.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/alloc.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/rbtree.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/stdlib.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/time.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/i8259a.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/main.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/concurrency.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/videomem.S" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/inc/multiboot.h" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/inc/memory.h" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/inc/concurrency.h" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/inc/allocator.h" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/inc/ints.h" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/inc/ioport.h" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/inc/desc.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/list.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/ctype.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/serial.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/paging.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/print.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/ints.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/string.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/backtrace.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/memory.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/balloc.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/CMakeLists.txt" isTestSource="false" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />

@@ -50,6 +50,7 @@ static void balloc_free_node(struct memory_node *node)
 	list_add(&node->link.ll, &balloc_free_list);
 }
 
+
 static void __balloc_add_range(struct rb_tree *tree,
 			unsigned long long from, unsigned long long to)
 {
@@ -92,6 +93,7 @@ static void __balloc_add_range(struct rb_tree *tree,
 		balloc_free_node(next);
 	}
 }
+
 
 static void __balloc_remove_range(struct rb_tree *tree,
 			unsigned long long from, unsigned long long to)
@@ -263,6 +265,7 @@ static void balloc_dump_ranges(void)
 	printf("free memory ranges:\n");
 	__balloc_dump_ranges(&free_ranges);
 }
+
 
 uintptr_t balloc_memory(void)
 {
