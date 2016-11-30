@@ -151,7 +151,7 @@ void deadlock_test() {
 }
 
 void test_threadfunc(void * arg) {
-    printf("I AM CALLED BITCH MUAHAHA\n");
+    printf("I AM CALLED MUAHAHA\n");
     char * textarg = (char *) arg;
     printf(textarg);
 }
@@ -173,15 +173,15 @@ void main(void *bootstrap_info)
 
 	enable_ints();
 
-    thread_create(test_threadfunc, (void *)"thihs was passed as argument from previous thread\n");
+    thread_create(test_threadfunc, (void *)"this was passed as argument from previous thread\n");
 
 
 	printf("Tests Begin\n");
 	test_buddy();
 	test_slab();
 
-
 	test_alloc();
+
 	test_kmap();
 	printf("Tests Finished\n");
 

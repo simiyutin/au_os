@@ -161,6 +161,7 @@ void mem_cache_setup(struct mem_cache *cache, size_t size, size_t align)
 	list_init(&cache->busy_pools);
 }
 
+//todo lock
 void mem_cache_shrink(struct mem_cache *cache)
 {
 	struct list_head free_slabs;
