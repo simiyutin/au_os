@@ -33,6 +33,7 @@ int thread_create(void (*function)(void *), void *argument) {
 
     build_stack((void *) new_stack, function, argument);
 
+
     printf("stack candidate:%lx\n", (unsigned long) new_stack);
 
     uintptr_t cur_stack = 0;
@@ -41,10 +42,11 @@ int thread_create(void (*function)(void *), void *argument) {
 
     printf("after:%lx\n", (unsigned long) cur_stack);
 
-    uintptr_t * prev_stack = NULL;
+    uintptr_t prev_stack = 1;
 
-    switch_thread((void **) prev_stack, (unsigned long) new_stack);
+    switch_thread(/*(void **) &prev_stack, */(unsigned long) cur_stack);
 
-    printf("at the end:%lx\n", (unsigned long) *prev_stack);
+    printf("at the end:%lx\n", (unsigned long) prev_stack);
+
     return 0;
 }

@@ -167,7 +167,14 @@ void main(void *bootstrap_info) {
 
     enable_ints();
 
-    //thread_create(test_threadfunc, (void *)"this was passed as argument from previous thread\n");
+
+    int test1 = 23;
+    int test2 = 2;
+
+    printf("first var: %lx \n", (unsigned long) &test1);
+    printf("first var: %lx \n", (unsigned long) &test2);
+
+    thread_create(test_threadfunc, (void *)"this was passed as argument from previous thread\n");
 
 
     printf("Tests Begin\n");
