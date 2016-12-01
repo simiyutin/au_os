@@ -7,6 +7,7 @@
 #include <print.h>
 #include <ints.h>
 #include <time.h>
+#include "../inc/string.h"
 #include "../inc/alloc.h"
 #include "../inc/debug.h"
 #include "../inc/ints.h"
@@ -149,6 +150,8 @@ void test_threadfunc(void *arg) {
     printf("I AM CALLED MUAHAHA\n");
     char *textarg = (char *) arg;
     printf(textarg);
+
+    while(1);
 }
 
 
@@ -167,13 +170,6 @@ void main(void *bootstrap_info) {
 
     enable_ints();
 
-
-    int test1 = 23;
-    int test2 = 2;
-
-    printf("first var: %lx \n", (unsigned long) &test1);
-    printf("first var: %lx \n", (unsigned long) &test2);
-
     thread_create(test_threadfunc, (void *)"this was passed as argument from previous thread\n");
 
 
@@ -185,6 +181,8 @@ void main(void *bootstrap_info) {
 
     test_kmap();
     printf("Tests Finished\n");
+
+
 
     while (1);
 }

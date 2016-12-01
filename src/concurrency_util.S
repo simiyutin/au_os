@@ -25,17 +25,8 @@ switch_thread:
 
     ret
 
-.global build_stack
-build_stack:
-    movq %rsp, %rax
-    movq %rdi, %rsp
-    pushq %rbx
-    pushq %rbp
-    pushq %r12
-    pushq %r13
-    pushq %r14
-    pushq %r15
-    pushfq
-    movq %rax, %rsp
-
-    ret
+.global start_thread_handler
+start_thread_handler:
+    movq %r14, %rdi
+    cld
+    call %r15

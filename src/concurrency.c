@@ -6,6 +6,7 @@
 #include "../inc/memory.h"
 #include "../inc/concurrency_util.h"
 #include "../inc/print.h"
+#include <string.h>
 
 
 
@@ -25,28 +26,34 @@ void unlock(struct spinlock* lock) {
 }
 
 
+struct stack_frame {
+    uint64_t rflags;
+    uint64_t r15;
+    uint64_t r14;
+    uint64_t r13;
+    uint64_t r12;
+    uint64_t rbp;
+    uint64_t rbx;
+    uint64_t handler;
+
+} __attribute__((packed));
+
+
 
 int thread_create(void (*function)(void *), void *argument) {
 
+    struct stack_frame * new_stack = mem_alloc(PAGE_SIZE);
 
-    uintptr_t new_stack = (uintptr_t) mem_alloc(PAGE_SIZE);
-
-    build_stack((void *) new_stack, function, argument);
-
-
-    printf("stack candidate:%lx\n", (unsigned long) new_stack);
+    new_stack->r15 = (uint64_t) function;
+    new_stack->r14 = (uint64_t) argument;
+    new_stack->handler = (uint64_t) &start_thread_handler;
 
     uintptr_t cur_stack = 0;
-    printf("before:%lx\n", (unsigned long) cur_stack);
     RSP(cur_stack);
 
-    printf("after:%lx\n", (unsigned long) cur_stack);
+    switch_thread((unsigned long) new_stack);
 
-    uintptr_t prev_stack = 1;
-
-    switch_thread(/*(void **) &prev_stack, */(unsigned long) cur_stack);
-
-    printf("at the end:%lx\n", (unsigned long) prev_stack);
+    printf("I will not be called\n");
 
     return 0;
 }
