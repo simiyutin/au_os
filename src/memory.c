@@ -370,10 +370,8 @@ void __page_free(struct page *page, int order) {
         return;
     }
 
-
     struct page_alloc_zone *zone = page_zone(page);
 
     page_free_zone(zone, page, order);
-
 
 }

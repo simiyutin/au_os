@@ -27,23 +27,11 @@ void unlock(struct spinlock* lock) {
 }
 
 
-struct stack_frame {
+struct thread * thread_create(void (*function)(void *), void *argument) {
 
-    uint64_t rflags;
-    uint64_t r15;
-    uint64_t r14;
-    uint64_t r13;
-    uint64_t r12;
-    uint64_t rbp;
-    uint64_t rbx;
-    uint64_t handler;
+    struct thread * thread = mem_alloc(sizeof(struct thread));
 
-} __attribute__((packed));
-
-// поинициализировать локи
-
-
-int thread_create(void (*function)(void *), void *argument) {
+    thread->status = RUNNING;
 
     struct stack_frame * new_stack = mem_alloc(PAGE_SIZE);
 
@@ -56,7 +44,7 @@ int thread_create(void (*function)(void *), void *argument) {
 
     printf("I will not be called\n");
 
-    return 0;
+    return thread;
 }
 
 
