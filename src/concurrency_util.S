@@ -11,9 +11,8 @@ switch_thread:
     pushq %r15
     pushfq
 
-    //movq %rsp, (%rdi)
-    //movq %rsi, %rsp
-    movq %rdi, %rsp
+    movq %rsp, (%rdi) // записать значение из rsp по адресу в rdi
+    movq %rsi, %rsp
 
     popfq
     popq %r15

@@ -51,7 +51,8 @@ int thread_create(void (*function)(void *), void *argument) {
     uintptr_t cur_stack = 0;
     RSP(cur_stack);
 
-    switch_thread((unsigned long) new_stack);
+    uintptr_t prev_stack = 0;
+    switch_thread(&prev_stack ,(uintptr_t) new_stack);
 
     printf("I will not be called\n");
 
