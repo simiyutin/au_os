@@ -1,14 +1,17 @@
-
-
-
 #include <stdatomic.h>
 #include <stdint.h>
 
 #ifndef SRC_CONCURRENCY_H
 #define SRC_CONCURRENCY_H
+
+
+
 struct spinlock {
     atomic_int locked;
 };
+
+static struct thread * running_thread;
+
 
 struct stack_frame {
 
@@ -29,13 +32,14 @@ enum thread_status {
 
 struct thread {
     enum thread_status status;
-    struct stack_frame frame;
+    struct stack_frame * frame;
 };
 
 void lock(struct spinlock*);
 void unlock(struct spinlock*);
 
 struct thread * thread_create(void (*function)(void *), void *argument);
+void thread_run (struct thread * thread_to_run);
 
 // правильная сигнатура?
 void exit();
