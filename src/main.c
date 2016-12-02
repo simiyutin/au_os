@@ -156,13 +156,14 @@ void test_threadfunc(void *arg) {
     int test = 1;
     printf("local variable test: %d\n", test);
 
-    printf("returning to mmasterr thread\n");
+    printf("returning to master thread\n");
 
     thread_run(&slave_thread, &master_thread);
 }
 
 
 void main(void *bootstrap_info) {
+
     qemu_gdb_hang();
 
     serial_setup();
@@ -192,8 +193,6 @@ void main(void *bootstrap_info) {
 
     test_kmap();
     printf("Tests Finished\n");
-
-
 
     while (1);
 }

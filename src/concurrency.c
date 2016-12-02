@@ -75,6 +75,9 @@ void thread_wait (struct thread * thread_to_wait) {
     while(thread_to_wait->status == RUNNING) {
         __asm__ volatile("":::"memory");
     }
+
+    mem_free(thread_to_wait->frame);
+    mem_free(thread_to_wait);
 }
 
 

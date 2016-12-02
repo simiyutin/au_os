@@ -16,7 +16,6 @@ static struct thread * running_thread;
 static struct thread master_thread;
 static struct thread slave_thread;
 
-
 struct stack_frame {
 
     uint64_t rflags;
