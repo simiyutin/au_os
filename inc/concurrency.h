@@ -14,6 +14,9 @@ void unlock(struct spinlock*);
 
 
 int thread_create(void (*function)(void *), void *argument);
+// правильная сигнатура?
+void exit();
+void wait(int pid);
 
 
 

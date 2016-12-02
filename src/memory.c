@@ -70,6 +70,7 @@ static void __page_alloc_zone_setup(uintptr_t zbegin, uintptr_t zend) {
                         + sizeof(struct page) * pages;
     struct page_alloc_zone *zone =
             va(balloc_alloc(size, 0, UINTPTR_MAX));
+    zone->lock.locked = 0;
 
     BUG_ON(pa(zone) == UINTPTR_MAX);
 

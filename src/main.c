@@ -170,7 +170,7 @@ void main(void *bootstrap_info) {
 
     enable_ints();
 
-    thread_create(test_threadfunc, (void *)"this was passed as argument from previous thread\n");
+    //thread_create(test_threadfunc, (void *)"this was passed as argument from previous thread\n");
 
 
     printf("Tests Begin\n");

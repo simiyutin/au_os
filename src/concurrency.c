@@ -7,6 +7,7 @@
 #include "../inc/concurrency_util.h"
 #include "../inc/print.h"
 #include <string.h>
+#include "../inc/ints.h"
 
 
 
@@ -27,6 +28,7 @@ void unlock(struct spinlock* lock) {
 
 
 struct stack_frame {
+
     uint64_t rflags;
     uint64_t r15;
     uint64_t r14;
@@ -38,6 +40,7 @@ struct stack_frame {
 
 } __attribute__((packed));
 
+// поинициализировать локи
 
 
 int thread_create(void (*function)(void *), void *argument) {
@@ -48,9 +51,6 @@ int thread_create(void (*function)(void *), void *argument) {
     new_stack->r14 = (uint64_t) argument;
     new_stack->handler = (uint64_t) &start_thread_handler;
 
-    uintptr_t cur_stack = 0;
-    RSP(cur_stack);
-
     uintptr_t prev_stack = 0;
     switch_thread(&prev_stack ,(uintptr_t) new_stack);
 
@@ -58,3 +58,5 @@ int thread_create(void (*function)(void *), void *argument) {
 
     return 0;
 }
+
+

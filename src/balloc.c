@@ -72,6 +72,7 @@ static void __balloc_add_range(struct rb_tree *tree,
 	new->begin = from;
 	new->end = to;
 
+
 	rb_link(&new->link.rb, parent, plink);
 	rb_insert(&new->link.rb, tree);
 
