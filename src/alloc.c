@@ -22,6 +22,7 @@
 struct mem_pool {
     struct list_head ll;
     struct page *page;
+    struct spinlock lock;
     void *data;
     size_t free;
     unsigned long long bitmask[1];
@@ -199,7 +200,7 @@ static int ffs(unsigned long long bitmask) {
 
 static void *mem_pool_alloc(struct mem_cache *cache, struct mem_pool *pool) {
 
-    lock(&memory_lock);
+    lock(&pool->lock);
     BUG_ON(!pool->free);
 
     const size_t words = cache->mask_words;
@@ -216,15 +217,17 @@ static void *mem_pool_alloc(struct mem_cache *cache, struct mem_pool *pool) {
 
         pool->bitmask[word] |= (1ul << bit);
         --pool->free;
-        unlock(&memory_lock);
+        unlock(&pool->lock);
         return (void *) (addr + pos * cache->obj_size);
     }
     BUG("Failed to find free slot in mem_pool")
-    unlock(&memory_lock);
+    unlock(&pool->lock);
 }
 
 static void mem_pool_free(struct mem_cache *cache, struct mem_pool *pool,
                           void *ptr) {
+
+    lock(&pool->lock);
     const uintptr_t offs = (uintptr_t) ptr - (uintptr_t) pool->data;
     const size_t pos = offs / cache->obj_size;
 
@@ -239,10 +242,12 @@ static void mem_pool_free(struct mem_cache *cache, struct mem_pool *pool,
     ++pool->free;
 
     BUG_ON(pool->free > cache->obj_count);
+    unlock(&pool->lock);
 }
 
 
 void *mem_cache_alloc(struct mem_cache *cache) {
+
     if (!list_empty(&cache->partial_pools)) {
         struct list_head *ptr = list_first(&cache->partial_pools);
         struct mem_pool *pool = LIST_ENTRY(ptr, struct mem_pool, ll);
@@ -285,7 +290,6 @@ void *mem_cache_alloc(struct mem_cache *cache) {
 
 void mem_cache_free(struct mem_cache *cache, void *ptr) {
 
-    lock(&memory_lock);
     const size_t pool_size = (size_t) 1 << (cache->pool_order + PAGE_SHIFT);
     const uintptr_t addr = align_down((uintptr_t) ptr, pool_size);
     struct mem_pool *pool = (struct mem_pool *) (addr + cache->meta_offs);
@@ -302,7 +306,6 @@ void mem_cache_free(struct mem_cache *cache, void *ptr) {
         list_add(&pool->ll, &cache->free_pools);
     }
 
-    unlock(&memory_lock);
 }
 
 

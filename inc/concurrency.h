@@ -9,8 +9,6 @@ struct spinlock {
     atomic_int locked;
 };
 
-struct spinlock memory_lock;
-
 void lock(struct spinlock*);
 void unlock(struct spinlock*);
 
