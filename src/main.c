@@ -156,6 +156,7 @@ void test_threadfunc(void *arg) {
     int test = 1;
     printf("local variable test: %d\n", test);
 
+    printf("returning to mmasterr thread\n");
 
     thread_run(&slave_thread, &master_thread);
 }
