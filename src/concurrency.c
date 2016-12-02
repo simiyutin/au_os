@@ -52,7 +52,7 @@ struct thread * thread_create(void (*function)(void *), void *argument) {
 void thread_run (struct thread * thread_from_run, struct thread * thread_to_run) {
 
     thread_to_run->status = RUNNING;
-    //running_thread = thread_to_run; // todo lock?, обобщить?
+    running_thread = thread_to_run; // todo lock?, обобщить?
 
     switch_thread((uintptr_t) &thread_from_run->frame, (uintptr_t) thread_to_run->frame);
 }
@@ -60,7 +60,6 @@ void thread_run (struct thread * thread_from_run, struct thread * thread_to_run)
 
 void thread_exit (){
     running_thread->status = STOPPED;
-
 }
 
 void thread_wait (struct thread * thread_to_wait) {
