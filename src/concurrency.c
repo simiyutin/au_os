@@ -27,28 +27,34 @@ void unlock(struct spinlock* lock) {
 }
 
 
-struct thread * thread_create(void (*function)(void *), void *argument) {
-
+struct thread * thread_alloc() {
     struct stack_frame * new_stack = mem_alloc(PAGE_SIZE);
+    struct thread * new_thread = mem_alloc(sizeof(struct thread));
 
-    new_stack->r15 = (uint64_t) function;
-    new_stack->r14 = (uint64_t) argument;
-    new_stack->handler = (uint64_t) &start_thread_handler;
-
-    struct thread * thread = mem_alloc(sizeof(struct thread));
-    thread->status = STOPPED;
-    thread->frame = new_stack;
-
-    return thread;
+    new_thread->frame = new_stack;
+    new_thread->status = STOPPED;
+    return new_thread;
 }
 
-void thread_run (struct thread * thread_to_run) {
+struct thread * thread_create(void (*function)(void *), void *argument) {
+
+    struct thread * new_thread = thread_alloc();
+
+    new_thread->frame->r15 = (uint64_t) function;
+    new_thread->frame->r14 = (uint64_t) argument;
+    new_thread->frame->handler = (uint64_t) &start_thread_handler;
+
+    new_thread->status = STOPPED;
+
+    return new_thread;
+}
+
+void thread_run (struct thread * thread_from_run, struct thread * thread_to_run) {
 
     thread_to_run->status = RUNNING;
-    running_thread = thread_to_run; // todo lock?
-    (void) running_thread;
-    uintptr_t prev_stack = 0;
-    switch_thread(&prev_stack, (uintptr_t) thread_to_run->frame);
+    //running_thread = thread_to_run; // todo lock?, обобщить?
+
+    switch_thread((uintptr_t) &thread_from_run->frame, (uintptr_t) thread_to_run->frame);
 }
 
 

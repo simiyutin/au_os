@@ -11,6 +11,8 @@ struct spinlock {
 };
 
 static struct thread * running_thread;
+static struct thread master_thread;
+static struct thread slave_thread;
 
 
 struct stack_frame {
@@ -38,8 +40,11 @@ struct thread {
 void lock(struct spinlock*);
 void unlock(struct spinlock*);
 
+
+struct thread * thread_alloc();
 struct thread * thread_create(void (*function)(void *), void *argument);
-void thread_run (struct thread * thread_to_run);
+
+void thread_run (struct thread * thread_from_run, struct thread * thread_to_run);
 
 void thread_exit();
 void thread_wait(struct thread *);

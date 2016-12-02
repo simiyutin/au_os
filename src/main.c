@@ -147,11 +147,17 @@ void deadlock_test() {
 }
 
 void test_threadfunc(void *arg) {
+
     printf("I AM CALLED MUAHAHA\n");
     char *textarg = (char *) arg;
     printf(textarg);
 
-    while(1);
+
+    int test = 1;
+    printf("local variable test: %d\n", test);
+
+
+    thread_run(&slave_thread, &master_thread);
 }
 
 
@@ -170,10 +176,11 @@ void main(void *bootstrap_info) {
 
     enable_ints();
 
+
     struct thread * thread_to_run = thread_create(test_threadfunc, (void *)"this was passed as argument from previous thread\n");
-
-    thread_run(thread_to_run);
-
+    slave_thread = *thread_to_run;
+    master_thread.status = STOPPED;
+    thread_run(&master_thread, thread_to_run);
 
 
     printf("Tests Begin\n");
