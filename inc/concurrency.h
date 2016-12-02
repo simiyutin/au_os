@@ -41,10 +41,7 @@ void unlock(struct spinlock*);
 struct thread * thread_create(void (*function)(void *), void *argument);
 void thread_run (struct thread * thread_to_run);
 
-// правильная сигнатура?
-void exit();
-void wait(struct thread *);
-
-
+void thread_exit();
+void thread_wait(struct thread *);
 
 #endif //SRC_CONCURRENCY_H
