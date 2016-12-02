@@ -177,10 +177,10 @@ void main(void *bootstrap_info) {
 
     enable_ints();
 
+    threads_init();
 
     struct thread * thread_to_run = thread_create(test_threadfunc, (void *)"this was passed as argument from previous thread\n");
     slave_thread = *thread_to_run;
-    master_thread.status = STOPPED;
     thread_run(&master_thread, thread_to_run);
 
 

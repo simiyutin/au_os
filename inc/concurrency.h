@@ -10,6 +10,8 @@ struct spinlock {
     atomic_int locked;
 };
 
+static struct spinlock threads_lock;
+
 static struct thread * running_thread;
 static struct thread master_thread;
 static struct thread slave_thread;
@@ -40,6 +42,8 @@ struct thread {
 void lock(struct spinlock*);
 void unlock(struct spinlock*);
 
+
+void threads_init();
 
 struct thread * thread_alloc();
 struct thread * thread_create(void (*function)(void *), void *argument);
