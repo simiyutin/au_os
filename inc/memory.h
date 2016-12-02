@@ -17,6 +17,7 @@
 
 #include <stdint.h>
 #include <list.h>
+#include "concurrency.h"
 
 static inline void *va(uintptr_t phys)
 { return (void *)(phys + HIGHER_BASE); }
@@ -39,6 +40,7 @@ struct page_alloc_zone {
 	struct list_head ll;
 	uintptr_t begin;
 	uintptr_t end;
+	struct spinlock lock;
 	struct list_head order[MAX_ORDER + 1];
 	struct page pages[1];
 };
