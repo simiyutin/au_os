@@ -5,10 +5,7 @@
 #include "../inc/print.h"
 #include "../inc/throw.h"
 
-int strcmp(const char *a,const char *b){
-    if (! (*a | *b)) return 0;
-    return (*a!=*b) ? *a-*b : strcmp(++a,++b);
-}
+
 
 int get_empty_file_slot() {
     int i = 0;
@@ -99,5 +96,29 @@ void writechar(struct FILE * file, char value) {
     ++file->byte_size;
 
     printf("passed\n");
-    // тут надо будет увелличивать файл, искать конец, и тд
 }
+
+void writestring(struct FILE * file, const char * string_to_write) {
+    size_t length = strlen(string_to_write);
+    for (size_t i = 0; i < length; ++i) {
+        writechar(file, string_to_write[i]);
+    }
+}
+
+const char * read_file_to_string(struct FILE * file) {
+    char * result = mem_alloc(file->byte_size + 1);
+    for (size_t i = 0; i < file->byte_size; ++i) {
+        result[i] = readchar(file, i);
+    }
+    result[file->byte_size] = '\0';
+    return result;
+}
+
+
+
+
+
+
+
+
+

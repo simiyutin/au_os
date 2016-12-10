@@ -163,9 +163,31 @@ void test_threadfunc(void *arg) {
     thread_run(&slave_thread, &master_thread);
 }
 
+void test_fs() {
+    const char * pathname = "first_file";
+    create(pathname);
+    struct FILE * first_file = open(pathname);
+    printf(first_file->pathname);
+    printf("\n");
+    const char * string_to_write = "abcd";
+    writestring(first_file, string_to_write);
+
+    printf("\n");
+    assert(readchar(first_file, 0) == 'a');
+    assert(readchar(first_file, 1) == 'b');
+    assert(readchar(first_file, 2) == 'c');
+    assert(readchar(first_file, 3) == 'd');
+    printf(read_file_to_string(first_file));
+    assert(strcmp(string_to_write,
+                  read_file_to_string(first_file)) == 0);
+    close(first_file);
+}
+
 void assert(int condition) {
     if (!condition) throw_ex("assertion failed");
 }
+
+
 
 
 void main(void *bootstrap_info) {
@@ -187,26 +209,10 @@ void main(void *bootstrap_info) {
     threads_init();
 
 
-    const char * pathname = "first_file";
-    create(pathname);
-    struct FILE * first_file = open(pathname);
-    printf(first_file->pathname);
-    printf("\n");
-    writechar(first_file, 'a');
-    writechar(first_file, 'b');
-    writechar(first_file, 'c');
-    writechar(first_file, 'd');
-
-    printf("\n");
-    assert(readchar(first_file, 0) == 'a');
-    assert(readchar(first_file, 1) == 'b');
-    assert(readchar(first_file, 2) == 'c');
-    assert(readchar(first_file, 3) == 'd');
-    printf("%c", readchar(first_file, 0));
-    close(first_file);
-
-
     printf("Tests Begin\n");
+
+    test_fs();
+
 
     const char * wtring_netween_threads = "you shall not pass!\n";
     struct thread * thread_to_run = thread_create(test_threadfunc, (void *)"this was passed as argument from previous thread\n");

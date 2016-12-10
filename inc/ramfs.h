@@ -32,6 +32,8 @@ void close(struct FILE * file);
 
 char readchar(struct FILE * file, int shift);
 void writechar(struct FILE * file, char value);
+void writestring(struct FILE *, const char *);
+const char * read_file_to_string(struct FILE * file);
 
 void mkdir(const char * pathname);
 //readdir

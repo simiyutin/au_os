@@ -264,3 +264,8 @@ int snprintf(char *buf, size_t size, const char *fmt, ...)
 
 	return rc;
 }
+
+int strcmp(const char *a,const char *b){
+	if (! (*a | *b)) return 0;
+	return (*a!=*b) ? *a-*b : strcmp(++a,++b);
+}
