@@ -86,10 +86,20 @@ char readchar(struct FILE * file, int shift) {
 
 
 void writechar(struct FILE * file, char value) {
+
     if (file->state != OPENED) throw_ex("trying to write to closed file");
     int pos = file->byte_size;
     printf("pos: %d\n", pos);
-    struct fsnode * block_shift = find_node_by_position(file->start, &pos);
+
+    struct fsnode * block_base;
+    if (file->current_writing_node == NULL) {
+        block_base = file->start;
+    } else {
+        printf("SEQUENTIAL WRITE !!!\n");
+        block_base = file->current_writing_node;
+        pos = file->current_writing_pos + 1;
+    }
+    struct fsnode * block_shift = find_node_by_position(block_base, &pos);
 
     if ((pos - BLOCK_SIZE ) > 0) {
         printf("create new node\n");
@@ -102,7 +112,10 @@ void writechar(struct FILE * file, char value) {
     }
 
     block_shift->data[pos] = value;
-    ++file->byte_size;
+
+    file->byte_size++;
+    file->current_writing_node = block_shift;
+    file->current_writing_pos = pos;
 
     printf("passed\n");
 }

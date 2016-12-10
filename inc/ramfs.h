@@ -20,7 +20,7 @@ struct FILE {
     int current_reading_byte;
     int current_reading_pos;
     struct fsnode * current_reading_node;
-    int current_writing_byte;
+    int current_writing_pos;
     struct fsnode * current_writing_node;
     int byte_size;
     FILE_STATE state;
