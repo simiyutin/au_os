@@ -1,6 +1,6 @@
 #ifndef SRC_RAMFS_H
 #define SRC_RAMFS_H
-#define BLOCK_SIZE 16
+#define BLOCK_SIZE 2
 #define FILE_TABLE_SIZE 128
 struct fsnode {
     struct fsnode * next;
@@ -17,9 +17,9 @@ struct fsnode {
 struct FILE {
     const char * pathname;
     struct fsnode * start;
-    //size_t current_reading_byte;
+    //int current_reading_byte;
     //struct fsnode * current_reading_node;
-    size_t byte_size;
+    int byte_size;
     FILE_STATE state;
 };
 
@@ -30,7 +30,7 @@ void create(const char * pathname);
 struct FILE * open(const char * pathname); //todo w+, w, r
 void close(struct FILE * file);
 
-char readchar(struct FILE * file, size_t shift);
+char readchar(struct FILE * file, int shift);
 void writechar(struct FILE * file, char value);
 
 void mkdir(const char * pathname);

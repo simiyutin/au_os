@@ -3,6 +3,7 @@
 #include "../inc/ramfs.h"
 #include "../inc/alloc.h"
 #include "../inc/print.h"
+#include "../inc/throw.h"
 
 int strcmp(const char *a,const char *b){
     if (! (*a | *b)) return 0;
@@ -21,7 +22,7 @@ void create(const char * pathname){
     first_file_node->next = NULL;
     int empty_file_slot_index = get_empty_file_slot();
     FILE_TABLE[empty_file_slot_index].state = CLOSED;
-    FILE_TABLE[empty_file_slot_index].byte_size = BLOCK_SIZE;
+    FILE_TABLE[empty_file_slot_index].byte_size = 0;
     FILE_TABLE[empty_file_slot_index].pathname = pathname;
     FILE_TABLE[empty_file_slot_index].start = first_file_node;
 }
@@ -50,44 +51,53 @@ void close(struct FILE * file) {
 }
 
 
-void throw_ex(const char * what) {
-    printf("\n");
-    printf(what);
-    printf("\n");
-    int a = 1;
-    int b = 1 / (a - 1);
-    (void *) b;
-}
 
-struct fsnode * find_node_by_position(struct FILE * file, size_t * pos) {
+
+struct fsnode * find_node_by_position(struct FILE * file, int * pos) {
     struct fsnode * node = file->start;
 
+    printf("*pos - BLOCK_SIZE: %d", *pos - BLOCK_SIZE);
     while (*pos - BLOCK_SIZE > 0 && node->next != NULL) {
         printf("cycle\n");
         node = node->next;
         *pos -= BLOCK_SIZE;
     }
-
+    printf("exit find_node\n");
     return node;
 }
 
-char readchar(struct FILE * file, size_t shift) {
+char readchar(struct FILE * file, int shift) {
     if (file->state != OPENED) throw_ex("trying to open closed file");
     if (file->byte_size <= shift) throw_ex("trying to read file out of range");
 
     //todo add current_reading to improve sequential reading
 
-
+    printf("find node\n");
     struct fsnode * block_shift = find_node_by_position(file, &shift);
-    
+
     return block_shift->data[shift];
 }
 
 
 void writechar(struct FILE * file, char value) {
     if (file->state != OPENED) throw_ex("trying to write to closed file");
-    struct fsnode * block_shift = find_node_by_position(file, &file->byte_size);
+    int pos = file->byte_size;
+    printf("pos: %d\n", pos);
+    struct fsnode * block_shift = find_node_by_position(file, &pos);
 
+    if ((pos - BLOCK_SIZE ) > 0) {
+        printf("create new node\n");
+        struct fsnode * prev_next = block_shift->next;
+        block_shift->next = (struct fsnode *) mem_alloc(sizeof(struct fsnode));
+        block_shift->next->next = prev_next;
+        block_shift->next->prev = block_shift;
+        block_shift = block_shift->next;
+        pos -= BLOCK_SIZE;
+    }
 
+    block_shift->data[pos] = value;
+    ++file->byte_size;
+
+    printf("passed\n");
     // тут надо будет увелличивать файл, искать конец, и тд
 }

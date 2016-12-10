@@ -21,6 +21,7 @@
 #include "../inc/balloc.h"
 #include "../inc/concurrency.h"
 #include "../inc/ramfs.h"
+#include "../inc/throw.h"
 
 static void qemu_gdb_hang(void) {
 #ifdef DEBUG
@@ -162,6 +163,10 @@ void test_threadfunc(void *arg) {
     thread_run(&slave_thread, &master_thread);
 }
 
+void assert(int condition) {
+    if (!condition) throw_ex("assertion failed");
+}
+
 
 void main(void *bootstrap_info) {
 
@@ -186,8 +191,20 @@ void main(void *bootstrap_info) {
     create(pathname);
     struct FILE * first_file = open(pathname);
     printf(first_file->pathname);
-    //close(first_file);
-    printf("%d", readchar(first_file, 0));
+    printf("\n");
+    writechar(first_file, 'a');
+    writechar(first_file, 'b');
+    writechar(first_file, 'c');
+    writechar(first_file, 'd');
+
+    printf("\n");
+    assert(readchar(first_file, 0) == 'a');
+    assert(readchar(first_file, 1) == 'b');
+    assert(readchar(first_file, 2) == 'c');
+    assert(readchar(first_file, 3) == 'd');
+    printf("%c", readchar(first_file, 0));
+    close(first_file);
+
 
     printf("Tests Begin\n");
 
