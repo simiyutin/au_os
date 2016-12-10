@@ -20,6 +20,7 @@
 #include "../inc/time.h"
 #include "../inc/balloc.h"
 #include "../inc/concurrency.h"
+#include "../inc/ramfs.h"
 
 static void qemu_gdb_hang(void) {
 #ifdef DEBUG
@@ -180,12 +181,25 @@ void main(void *bootstrap_info) {
 
     threads_init();
 
+
+    const char * pathname = "first_file";
+    create(pathname);
+    struct FILE * first_file = open(pathname);
+    printf(first_file->pathname);
+    //close(first_file);
+    printf("%d", readchar(first_file, 0));
+
+    printf("Tests Begin\n");
+
+    const char * wtring_netween_threads = "you shall not pass!\n";
     struct thread * thread_to_run = thread_create(test_threadfunc, (void *)"this was passed as argument from previous thread\n");
     slave_thread = *thread_to_run;
     thread_run(&master_thread, thread_to_run);
 
+    printf(wtring_netween_threads);
+    printf("i passed!\n");
 
-    printf("Tests Begin\n");
+
     test_buddy();
     test_slab();
 
