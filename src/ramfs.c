@@ -50,8 +50,7 @@ void close(struct FILE * file) {
 
 
 
-struct fsnode * find_node_by_position(struct FILE * file, int * pos) {
-    struct fsnode * node = file->start;
+struct fsnode * find_node_by_position(struct fsnode * node, int * pos) {
 
     printf("*pos - BLOCK_SIZE: %d", *pos - BLOCK_SIZE);
     while (*pos - BLOCK_SIZE > 0 && node->next != NULL) {
@@ -67,12 +66,22 @@ char readchar(struct FILE * file, int shift) {
     if (file->state != OPENED) throw_ex("trying to open closed file");
     if (file->byte_size <= shift) throw_ex("trying to read file out of range");
 
-    //todo add current_reading to improve sequential reading
+    struct fsnode * block_base;
+    int pos = shift;
+    if (file->current_reading_byte == pos - 1) {
+        printf("SEQUENTIAL READ !!!\n");
+        block_base = file->current_reading_node;
+        pos = file->current_reading_pos + 1;
+    } else {
+        block_base = (file->start);
+    }
 
-    printf("find node\n");
-    struct fsnode * block_shift = find_node_by_position(file, &shift);
+    struct fsnode * block_shift = find_node_by_position(block_base, &pos);
+    file->current_reading_node = block_shift;
+    file->current_reading_pos = pos;
+    file->current_reading_byte = shift;
 
-    return block_shift->data[shift];
+    return block_shift->data[pos];
 }
 
 
@@ -80,7 +89,7 @@ void writechar(struct FILE * file, char value) {
     if (file->state != OPENED) throw_ex("trying to write to closed file");
     int pos = file->byte_size;
     printf("pos: %d\n", pos);
-    struct fsnode * block_shift = find_node_by_position(file, &pos);
+    struct fsnode * block_shift = find_node_by_position(file->start, &pos);
 
     if ((pos - BLOCK_SIZE ) > 0) {
         printf("create new node\n");

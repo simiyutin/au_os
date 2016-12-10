@@ -17,8 +17,11 @@ struct fsnode {
 struct FILE {
     const char * pathname;
     struct fsnode * start;
-    //int current_reading_byte;
-    //struct fsnode * current_reading_node;
+    int current_reading_byte;
+    int current_reading_pos;
+    struct fsnode * current_reading_node;
+    int current_writing_byte;
+    struct fsnode * current_writing_node;
     int byte_size;
     FILE_STATE state;
 };
