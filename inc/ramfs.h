@@ -17,9 +17,11 @@ struct fsnode {
 struct FILE {
     const char * pathname;
     struct fsnode * start;
+    // sequential reading optimisation
     int current_reading_byte;
     int current_reading_pos;
     struct fsnode * current_reading_node;
+    // sequential writing optimisation
     int current_writing_pos;
     struct fsnode * current_writing_node;
     int byte_size;

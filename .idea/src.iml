@@ -5,19 +5,45 @@
       <sourceFolder url="file://$MODULE_DIR$/src/alloc.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/rbtree.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/stdlib.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/time.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/concurrency.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/list.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/i8259a.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/main.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/list.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/time.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/throw.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/ctype.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/serial.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/paging.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/print.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/ints.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/ramfs.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/string.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/backtrace.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/memory.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/balloc.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/inc/stdlib.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/inc/concurrency.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/inc/ioport.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/inc/concurrency_util.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/inc/i8259a.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/inc/kernel.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/inc/throw.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/inc/time.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/inc/list.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/inc/ctype.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/inc/paging.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/inc/print.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/inc/ints.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/inc/ramfs.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/inc/string.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/inc/backtrace.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/inc/serial.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/inc/memory.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/inc/balloc.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/inc/debug.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/inc/alloc.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/inc/rbtree.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/inc/desc.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/CMakeLists.txt" isTestSource="false" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />

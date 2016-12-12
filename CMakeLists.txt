@@ -41,6 +41,6 @@ set(SOURCE_FILES
     src/serial.c
     src/stdlib.c
     src/string.c
-    src/time.c inc/ramfs.h src/ramfs.c)
+    src/time.c inc/ramfs.h src/ramfs.c inc/throw.h src/throw.c)
 
 add_executable(src ${SOURCE_FILES})
