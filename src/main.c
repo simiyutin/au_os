@@ -167,6 +167,7 @@ void test_fs() {
     const char * pathname = "first_file";
     create(pathname);
     struct FILE * first_file = open(pathname);
+    assert(strcmp(first_file->pathname, pathname) == 0);
     printf(first_file->pathname);
     printf("\n");
     const char * string_to_write = "abcd";
@@ -177,10 +178,28 @@ void test_fs() {
     assert(readchar(first_file, 1) == 'b');
     assert(readchar(first_file, 2) == 'c');
     assert(readchar(first_file, 3) == 'd');
-    printf(read_file_to_string(first_file));
+    printf("\n");
     assert(strcmp(string_to_write,
                   read_file_to_string(first_file)) == 0);
+
+    //stress test
+    printf("stress test start..\n");
+    for(size_t i = 0 ; i < 1000000; ++i) { // one million
+        writestring(first_file, "this is sparta");
+    }
+    printf("stress test end.\n");
+
     close(first_file);
+
+    // fails when file does not exist, ok
+//    printf("\n\n\nsearching unexisted file ..\n\n\n");
+//    struct FILE * second_file = open("does_not_exist");
+//    assert(strcmp(second_file->pathname, "does_not_exist") == 0);
+//    writestring(second_file, "will crash everything");
+//    printf("%s\n", read_file_to_string(second_file));
+//    printf("%s\n", read_file_to_string(first_file));
+
+
 }
 
 void assert(int condition) {

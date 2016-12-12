@@ -26,8 +26,16 @@ void create(const char * pathname){
 
 int find_file(const char * pathname) {
     int i = 0;
-    for (;strcmp(FILE_TABLE[i].pathname, pathname) != 0
-          && FILE_TABLE[i].state == DELETED; ++i){}
+    for (;i < FILE_TABLE_SIZE &&
+                  (FILE_TABLE[i].state == DELETED ||
+                   FILE_TABLE[i].pathname == NULL ||
+                   strcmp(FILE_TABLE[i].pathname, pathname) != 0
+                   ); ++i)
+    {
+        printf("searching .. %d\n", i);
+    }
+
+    if (i == FILE_TABLE_SIZE) throw_ex("file not found");
 
     return i;
 }
@@ -52,13 +60,10 @@ void close(struct FILE * file) {
 
 struct fsnode * find_node_by_position(struct fsnode * node, int * pos) {
 
-    printf("*pos - BLOCK_SIZE: %d", *pos - BLOCK_SIZE);
     while (*pos - BLOCK_SIZE > 0 && node->next != NULL) {
-        printf("cycle\n");
         node = node->next;
         *pos -= BLOCK_SIZE;
     }
-    printf("exit find_node\n");
     return node;
 }
 
@@ -69,7 +74,7 @@ char readchar(struct FILE * file, int shift) {
     struct fsnode * block_base;
     int pos = shift;
     if (file->current_reading_byte == pos - 1) {
-        printf("SEQUENTIAL READ !!!\n");
+        //printf("SEQUENTIAL READ !!!\n");
         block_base = file->current_reading_node;
         pos = file->current_reading_pos + 1;
     } else {
@@ -88,21 +93,19 @@ char readchar(struct FILE * file, int shift) {
 void writechar(struct FILE * file, char value) {
 
     if (file->state != OPENED) throw_ex("trying to write to closed file");
-    int pos = file->byte_size;
-    printf("pos: %d\n", pos);
 
+    int pos = file->byte_size;
     struct fsnode * block_base;
     if (file->current_writing_node == NULL) {
         block_base = file->start;
     } else {
-        printf("SEQUENTIAL WRITE !!!\n");
+        //printf("SEQUENTIAL WRITE !!!\n");
         block_base = file->current_writing_node;
         pos = file->current_writing_pos + 1;
     }
     struct fsnode * block_shift = find_node_by_position(block_base, &pos);
 
     if ((pos - BLOCK_SIZE ) > 0) {
-        printf("create new node\n");
         struct fsnode * prev_next = block_shift->next;
         block_shift->next = (struct fsnode *) mem_alloc(sizeof(struct fsnode));
         block_shift->next->next = prev_next;
@@ -116,8 +119,6 @@ void writechar(struct FILE * file, char value) {
     file->byte_size++;
     file->current_writing_node = block_shift;
     file->current_writing_pos = pos;
-
-    printf("passed\n");
 }
 
 void writestring(struct FILE * file, const char * string_to_write) {

@@ -1,6 +1,6 @@
 #ifndef SRC_RAMFS_H
 #define SRC_RAMFS_H
-#define BLOCK_SIZE 2
+#define BLOCK_SIZE 512
 #define FILE_TABLE_SIZE 128
 struct fsnode {
     struct fsnode * next;
@@ -38,8 +38,8 @@ void writechar(struct FILE * file, char value);
 void writestring(struct FILE *, const char *);
 const char * read_file_to_string(struct FILE * file);
 
-void mkdir(const char * pathname);
-//readdir
+//todo void mkdir(const char * pathname);
+//todo readdir
 
 
 #endif //SRC_RAMFS_H
