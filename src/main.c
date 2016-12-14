@@ -7,6 +7,7 @@
 #include <print.h>
 #include <ints.h>
 #include <time.h>
+#include <string.h>
 #include "../inc/string.h"
 #include "../inc/alloc.h"
 #include "../inc/debug.h"
@@ -164,6 +165,18 @@ void test_threadfunc(void *arg) {
 }
 
 void test_fs() {
+
+    const char * test_namepath = "/root/filename";
+    char * duped = strdup(test_namepath);
+    printf(duped);
+
+    char * token;
+    while ((token = strsep(&duped, "/")) != NULL)
+        printf("%s\n", token);
+
+
+
+
     const char * pathname = "first_file";
     create(pathname);
     struct FILE * first_file = open(pathname);
@@ -189,29 +202,14 @@ void test_fs() {
         writestring(first_file, "a");
     }
 
-//    writechar(first_file, 10, 'h');
-//    writechar(first_file, 11, 'e');
-//    writechar(first_file, 12, 'l');
-//    writechar(first_file, 13, 'l');
-//    writechar(first_file, 14, 'o');
-//
-//    const char * outp = read_file_to_string(first_file);
-//    printf(outp);
-
     printf("stress test end.\n");
 
     close(first_file);
 
-    // fails when file does not exist, ok
-//    printf("\n\n\nsearching unexisted file ..\n\n\n");
-//    struct FILE * second_file = open("does_not_exist");
-//    assert(strcmp(second_file->pathname, "does_not_exist") == 0);
-//    writestring(second_file, "will crash everything");
-//    printf("%s\n", read_file_to_string(second_file));
-//    printf("%s\n", read_file_to_string(first_file));
+    mkdir("/root");
+    create("/ground_zero_file");
 
 
-    mkdir("/usr");
 
 
 }
