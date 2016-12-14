@@ -211,6 +211,9 @@ void test_fs() {
 //    printf("%s\n", read_file_to_string(first_file));
 
 
+    mkdir("/usr");
+
+
 }
 
 void assert(int condition) {

@@ -13,9 +13,7 @@ int get_empty_file_slot() {
     return i;
 }
 
-void create(const char * pathname){
-
-    if(find_file(pathname) != FILE_TABLE_SIZE) throw_ex("trying to create file which already exists");
+int __create_file(const char * pathname) {
 
     struct fsnode * first_file_node = (struct fsnode *) mem_alloc(sizeof(struct fsnode));
     first_file_node->prev = NULL;
@@ -25,17 +23,26 @@ void create(const char * pathname){
     FILE_TABLE[empty_file_slot_index].byte_size = 0;
     FILE_TABLE[empty_file_slot_index].pathname = pathname;
     FILE_TABLE[empty_file_slot_index].start = first_file_node;
+
+    return empty_file_slot_index;
 }
 
 int find_file(const char * pathname) {
     int i = 0;
     for (;i < FILE_TABLE_SIZE &&
-                  (FILE_TABLE[i].state == DELETED ||
-                   FILE_TABLE[i].pathname == NULL ||
-                   strcmp(FILE_TABLE[i].pathname, pathname) != 0
-                   ); ++i);
-    
+          (FILE_TABLE[i].state == DELETED ||
+           FILE_TABLE[i].pathname == NULL ||
+           strcmp(FILE_TABLE[i].pathname, pathname) != 0
+          ); ++i);
+
     return i;
+}
+
+void create(const char * pathname){
+
+    if(find_file(pathname) != FILE_TABLE_SIZE) throw_ex("trying to create file which already exists");
+    __create_file(pathname);
+
 }
 
 struct FILE * open(const char * pathname) {
@@ -140,7 +147,9 @@ const char * read_file_to_string(struct FILE * file) {
 
 
 void mkdir(const char * pathname) {
-    //if
+    if(find_file(pathname) != FILE_TABLE_SIZE) throw_ex("trying to create directory which already exists");
+    int file_id = __create_file(pathname);
+
 }
 
 
