@@ -14,6 +14,9 @@ int get_empty_file_slot() {
 }
 
 void create(const char * pathname){
+
+    if(find_file(pathname) != FILE_TABLE_SIZE) throw_ex("trying to create file which already exists");
+
     struct fsnode * first_file_node = (struct fsnode *) mem_alloc(sizeof(struct fsnode));
     first_file_node->prev = NULL;
     first_file_node->next = NULL;
@@ -30,21 +33,16 @@ int find_file(const char * pathname) {
                   (FILE_TABLE[i].state == DELETED ||
                    FILE_TABLE[i].pathname == NULL ||
                    strcmp(FILE_TABLE[i].pathname, pathname) != 0
-                   ); ++i)
-    {
-        printf("searching .. %d\n", i);
-    }
-
-    if (i == FILE_TABLE_SIZE) throw_ex("file not found");
-
+                   ); ++i);
+    
     return i;
 }
 
 struct FILE * open(const char * pathname) {
 
     int i = find_file(pathname);
+    if (i == FILE_TABLE_SIZE) throw_ex("file not found");
 
-    //todo handle out of range
 
     FILE_TABLE[i].state = OPENED;
 
@@ -138,6 +136,11 @@ const char * read_file_to_string(struct FILE * file) {
     }
     result[file->byte_size] = '\0';
     return result;
+}
+
+
+void mkdir(const char * pathname) {
+    //if
 }
 
 

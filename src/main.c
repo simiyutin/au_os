@@ -182,7 +182,7 @@ void test_fs() {
     assert(strcmp(string_to_write,
                   read_file_to_string(first_file)) == 0);
 
-    
+
     //stress test
     printf("stress test start..\n");
     for(size_t i = 0 ; i < 10000000; ++i) { // ten megabytes, fails on 100 megabytes
