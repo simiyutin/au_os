@@ -166,8 +166,6 @@ void test_threadfunc(void *arg) {
 
 void test_fs() {
 
-
-
     const char * pathname = "first_file";
     create(pathname);
 

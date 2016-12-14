@@ -13,26 +13,6 @@ int get_empty_file_slot() {
     return i;
 }
 
-int __create_file(const char * pathname) {
-
-    struct fsnode * first_file_node = (struct fsnode *) mem_alloc(sizeof(struct fsnode));
-    first_file_node->prev = NULL;
-    first_file_node->next = NULL;
-    int empty_file_slot_index = get_empty_file_slot();
-    FILE_TABLE[empty_file_slot_index].state = CLOSED;
-    FILE_TABLE[empty_file_slot_index].byte_size = 0;
-    FILE_TABLE[empty_file_slot_index].pathname = pathname;
-    FILE_TABLE[empty_file_slot_index].start = first_file_node;
-
-    return empty_file_slot_index;
-}
-
-int __create_dir(const char* pathname) {
-    int result = __create_file(pathname);
-    FILE_TABLE[result].type = FILE_TYPE_DIR;
-    return result;
-}
-
 int __recursive_search(int prev_id, char * pathname) {
     char * filename = strsep(&pathname, "/");
     if (filename == NULL) return prev_id;
@@ -77,9 +57,45 @@ int __find_file(const char *pathname) {
     return __recursive_search(i, duplicated_pathname);
 }
 
+int __create_file(const char * pathname) {
+
+//    const char * dir_name = extract_dir(pathname);
+//    const char * file_name = extract_name(pathname);
+
+    const char * dir_name = NULL;
+    const char * file_name = "/testfile";
+
+    int dir = __find_file(dir_name);
+
+    struct fsnode * first_file_node = (struct fsnode *) mem_alloc(sizeof(struct fsnode));
+    first_file_node->prev = NULL;
+    first_file_node->next = NULL;
+    int empty_file_slot_index = get_empty_file_slot();
+    FILE_TABLE[empty_file_slot_index].state = CLOSED;
+    FILE_TABLE[empty_file_slot_index].byte_size = 0;
+    FILE_TABLE[empty_file_slot_index].pathname = file_name;
+    FILE_TABLE[empty_file_slot_index].start = first_file_node;
+    FILE_TABLE[empty_file_slot_index].type = FILE_TYPE_FILE;
+
+
+    //todo аааай вааай апасна
+    struct link * new_link = (struct link *) &FILE_TABLE[dir].start->data + FILE_TABLE[dir].byte_size;
+    new_link->target = &FILE_TABLE[empty_file_slot_index];
+    new_link->name = file_name;
+
+    return empty_file_slot_index;
+}
+
+int __create_dir(const char* pathname) {
+    int result = __create_file(pathname);
+    FILE_TABLE[result].type = FILE_TYPE_DIR;
+    return result;
+}
+
 void create(const char * pathname){
 
     if(__find_file(pathname) != FILE_TABLE_SIZE) throw_ex("trying to create file which already exists");
+    printf("\n\n\nSUCCESS\n\n\n");
     __create_file(pathname);
 
 }
