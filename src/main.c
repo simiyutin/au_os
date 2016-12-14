@@ -166,48 +166,40 @@ void test_threadfunc(void *arg) {
 
 void test_fs() {
 
-    const char * test_namepath = "/root/filename";
-    char * duped = strdup(test_namepath);
-    printf(duped);
-
-    char * token;
-    while ((token = strsep(&duped, "/")) != NULL)
-        printf("%s\n", token);
-
-
 
 
     const char * pathname = "first_file";
     create(pathname);
-    struct FILE * first_file = open(pathname);
-    assert(strcmp(first_file->pathname, pathname) == 0);
-    printf(first_file->pathname);
-    printf("\n");
-    const char * string_to_write = "abcd";
-    writestring(first_file, string_to_write);
 
-    printf("\n");
-    assert(readchar(first_file, 0) == 'a');
-    assert(readchar(first_file, 1) == 'b');
-    assert(readchar(first_file, 2) == 'c');
-    assert(readchar(first_file, 3) == 'd');
-    printf("\n");
-    assert(strcmp(string_to_write,
-                  read_file_to_string(first_file)) == 0);
-
-
-    //stress test
-    printf("stress test start..\n");
-    for(size_t i = 0 ; i < 10000000; ++i) { // ten megabytes, fails on 100 megabytes
-        writestring(first_file, "a");
-    }
-
-    printf("stress test end.\n");
-
-    close(first_file);
-
-    mkdir("/root");
-    create("/ground_zero_file");
+//    struct FILE * first_file = open(pathname);
+//    assert(strcmp(first_file->pathname, pathname) == 0);
+//    printf(first_file->pathname);
+//    printf("\n");
+//    const char * string_to_write = "abcd";
+//    writestring(first_file, string_to_write);
+//
+//    printf("\n");
+//    assert(readchar(first_file, 0) == 'a');
+//    assert(readchar(first_file, 1) == 'b');
+//    assert(readchar(first_file, 2) == 'c');
+//    assert(readchar(first_file, 3) == 'd');
+//    printf("\n");
+//    assert(strcmp(string_to_write,
+//                  read_file_to_string(first_file)) == 0);
+//
+//
+//    //stress test
+//    printf("stress test start..\n");
+//    for(size_t i = 0 ; i < 10000000; ++i) { // ten megabytes, fails on 100 megabytes
+//        writestring(first_file, "a");
+//    }
+//
+//    printf("stress test end.\n");
+//
+//    close(first_file);
+//
+//    mkdir("/root");
+//    create("/ground_zero_file");
 
 
 

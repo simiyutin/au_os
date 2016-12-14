@@ -27,27 +27,66 @@ int __create_file(const char * pathname) {
     return empty_file_slot_index;
 }
 
-int find_file(const char * pathname) {
+int __create_dir(const char* pathname) {
+    int result = __create_file(pathname);
+    FILE_TABLE[result].type = FILE_TYPE_DIR;
+    return result;
+}
+
+int __recursive_search(int prev_id, char * pathname) {
+    char * filename = strsep(&pathname, "/");
+    if (filename == NULL) return prev_id;
+    struct FILE prev_file = FILE_TABLE[prev_id];
+    if (prev_file.type != FILE_TYPE_DIR) throw_ex("no such file or directory"); //todo may be return FILE_TABLE_SIZE
+
+
+    int NUMBER_OF_LINKS = prev_file.byte_size / sizeof (struct link); //todo case when file and directory names are equal
+
+    // TODO VERY IMPORTANT HANDLE CASE WHEN DIRECTORY HAS MORE FILES THAN FIT IN ONE BLOCK
+    // TODO OR RESTRICT NUMBER OF FILES IN DIR BY SIZE OF BLOCK
+    struct link * links = (struct link *) prev_file.start->data;
+
+
+    int cur_id = 0;
+    for (;cur_id < NUMBER_OF_LINKS &&
+          (links[cur_id].target->state == DELETED ||
+           links[cur_id].name == NULL ||
+           strcmp(links[cur_id].name, filename) != 0
+          ); ++cur_id);
+
+    if (cur_id == NUMBER_OF_LINKS) return FILE_TABLE_SIZE; // not found
+
+    return __recursive_search(cur_id, pathname);
+
+}
+
+int __find_file(const char *pathname) {
+
+    char * duplicated_pathname = strdup(pathname);
+    char * filename = strsep(&duplicated_pathname, "/");
+
+    //find entry point to recursion
     int i = 0;
     for (;i < FILE_TABLE_SIZE &&
           (FILE_TABLE[i].state == DELETED ||
            FILE_TABLE[i].pathname == NULL ||
-           strcmp(FILE_TABLE[i].pathname, pathname) != 0
+           strcmp(FILE_TABLE[i].pathname, filename) != 0
           ); ++i);
 
-    return i;
+    if (i == FILE_TABLE_SIZE) return i;
+    return __recursive_search(i, duplicated_pathname);
 }
 
 void create(const char * pathname){
 
-    if(find_file(pathname) != FILE_TABLE_SIZE) throw_ex("trying to create file which already exists");
+    if(__find_file(pathname) != FILE_TABLE_SIZE) throw_ex("trying to create file which already exists");
     __create_file(pathname);
 
 }
 
 struct FILE * open(const char * pathname) {
 
-    int i = find_file(pathname);
+    int i = __find_file(pathname);
     if (i == FILE_TABLE_SIZE) throw_ex("file not found");
 
 
@@ -147,9 +186,8 @@ const char * read_file_to_string(struct FILE * file) {
 
 
 void mkdir(const char * pathname) {
-    if(find_file(pathname) != FILE_TABLE_SIZE) throw_ex("trying to create directory which already exists");
+    if(__find_file(pathname) != FILE_TABLE_SIZE) throw_ex("trying to create directory which already exists");
     int file_id = __create_file(pathname);
-
 }
 
 
