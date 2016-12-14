@@ -184,9 +184,19 @@ void test_fs() {
 
     //stress test
     printf("stress test start..\n");
-    for(size_t i = 0 ; i < 1000000; ++i) { // one million
-        writestring(first_file, "this is sparta");
+    for(size_t i = 0 ; i < 10000000; ++i) { // ten megabytes, fails on 100 megabytes
+        writestring(first_file, "a");
     }
+
+//    writechar(first_file, 10, 'h');
+//    writechar(first_file, 11, 'e');
+//    writechar(first_file, 12, 'l');
+//    writechar(first_file, 13, 'l');
+//    writechar(first_file, 14, 'o');
+//
+//    const char * outp = read_file_to_string(first_file);
+//    printf(outp);
+
     printf("stress test end.\n");
 
     close(first_file);

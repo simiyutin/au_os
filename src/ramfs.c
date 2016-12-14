@@ -68,20 +68,20 @@ struct fsnode * find_node_by_position(struct fsnode * node, int * pos) {
 }
 
 char readchar(struct FILE * file, int shift) {
-    if (file->state != OPENED) throw_ex("trying to open closed file");
+
+    if (file->state != OPENED) throw_ex("trying to read closed file");
     if (file->byte_size <= shift) throw_ex("trying to read file out of range");
 
     struct fsnode * block_base;
     int pos = shift;
     if (file->current_reading_byte == pos - 1) {
-        //printf("SEQUENTIAL READ !!!\n");
         block_base = file->current_reading_node;
         pos = file->current_reading_pos + 1;
     } else {
         block_base = (file->start);
     }
-
     struct fsnode * block_shift = find_node_by_position(block_base, &pos);
+
     file->current_reading_node = block_shift;
     file->current_reading_pos = pos;
     file->current_reading_byte = shift;
@@ -90,18 +90,18 @@ char readchar(struct FILE * file, int shift) {
 }
 
 
-void writechar(struct FILE * file, char value) {
+void writechar(struct FILE * file, int shift, char value) {
 
     if (file->state != OPENED) throw_ex("trying to write to closed file");
+    if (file->byte_size < shift) throw_ex("trying to write leaving gap of trash");
 
-    int pos = file->byte_size;
+    int pos = shift;
     struct fsnode * block_base;
-    if (file->current_writing_node == NULL) {
-        block_base = file->start;
-    } else {
-        //printf("SEQUENTIAL WRITE !!!\n");
+    if (file->current_writing_byte == pos - 1) {
         block_base = file->current_writing_node;
         pos = file->current_writing_pos + 1;
+    } else {
+        block_base = file->start;
     }
     struct fsnode * block_shift = find_node_by_position(block_base, &pos);
 
@@ -118,17 +118,20 @@ void writechar(struct FILE * file, char value) {
 
     file->byte_size++;
     file->current_writing_node = block_shift;
+    file->current_writing_byte = shift;
     file->current_writing_pos = pos;
 }
 
 void writestring(struct FILE * file, const char * string_to_write) {
+
     size_t length = strlen(string_to_write);
     for (size_t i = 0; i < length; ++i) {
-        writechar(file, string_to_write[i]);
+        writechar(file, file->byte_size, string_to_write[i]);
     }
 }
 
 const char * read_file_to_string(struct FILE * file) {
+
     char * result = mem_alloc(file->byte_size + 1);
     for (size_t i = 0; i < file->byte_size; ++i) {
         result[i] = readchar(file, i);

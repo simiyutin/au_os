@@ -22,6 +22,7 @@ struct FILE {
     int current_reading_pos;
     struct fsnode * current_reading_node;
     // sequential writing optimisation
+    int current_writing_byte;
     int current_writing_pos;
     struct fsnode * current_writing_node;
     int byte_size;
@@ -36,7 +37,7 @@ struct FILE * open(const char * pathname); //todo w+, w, r
 void close(struct FILE * file);
 
 char readchar(struct FILE * file, int shift);
-void writechar(struct FILE * file, char value);
+void writechar(struct FILE * file, int shift, char value);
 void writestring(struct FILE *, const char *);
 const char * read_file_to_string(struct FILE * file);
 
