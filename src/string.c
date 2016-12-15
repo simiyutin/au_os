@@ -29,12 +29,19 @@ void *memset(void *dst, int fill, size_t size)
 	return dst;
 }
 
-char * strdup(const char * tocopy) {
-    size_t toreturnsize = strlen(tocopy);
-    char * toreturn = mem_alloc(toreturnsize);
-    memcpy((void *) toreturn, (void *) tocopy, toreturnsize);
+char *strdup (const char *s)
+{
+    printf("STRDUP CALLED\n");
+    size_t len = strlen(s) + 1;
+    char *new = mem_alloc (len);
 
-    return toreturn;
+    if (new == NULL)
+        return NULL;
+
+    memcpy (new, s, len);
+
+    printf("numeric pointer: %d\n", (int) new);
+    return new;
 }
 
 char * strsep(register char **stringp, register const char *delim) {

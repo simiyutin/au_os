@@ -5,7 +5,8 @@
 #include "../inc/print.h"
 #include "../inc/throw.h"
 
-
+char fnbuf[256];
+char fnbuf2[256];
 
 int get_empty_file_slot() {
     int i = 0;
@@ -14,11 +15,14 @@ int get_empty_file_slot() {
 }
 
 int __recursive_search(int prev_id, char * pathname) {
+
+
     char * filename = strsep(&pathname, "/");
     if (filename == NULL) return prev_id;
+    printf("recursive search: filename: %s\n", filename);
     struct FILE prev_file = FILE_TABLE[prev_id];
-    if (prev_file.type != FILE_TYPE_DIR) throw_ex("no such file or directory"); //todo may be return FILE_TABLE_SIZE
-
+    if (prev_file.type != FILE_TYPE_DIR) throw_ex("no such directory"); //todo may be return FILE_TABLE_SIZE
+    printf("recursive search: passed first step\n");
 
     int NUMBER_OF_LINKS = prev_file.byte_size / sizeof (struct link); //todo case when file and directory names are equal
 
@@ -42,9 +46,17 @@ int __recursive_search(int prev_id, char * pathname) {
 
 int __find_file(const char *pathname) {
 
-    char * duplicated_pathname = strdup(pathname);
-    char * filename = strsep(&duplicated_pathname, "/");
+    printf("__find_file\n");
+    if (pathname == NULL) return FILE_TABLE_SIZE;
 
+    char * duplicated_filename = fnbuf;
+    memset(duplicated_filename, 0, 256);
+
+    size_t len = strlen(pathname) + 1;
+    memcpy (duplicated_filename, pathname, len);
+
+    char * filename = strsep(&duplicated_filename, "/");
+    printf("extracted filename: %s\n", filename);
     //find entry point to recursion
     int i = 0;
     for (;i < FILE_TABLE_SIZE &&
@@ -54,18 +66,37 @@ int __find_file(const char *pathname) {
           ); ++i);
 
     if (i == FILE_TABLE_SIZE) return i;
-    return __recursive_search(i, duplicated_pathname);
+
+    printf("entering recursive search..\n");
+    return __recursive_search(i, duplicated_filename);
 }
 
 int __create_file(const char * pathname) {
 
-//    const char * dir_name = extract_dir(pathname);
-//    const char * file_name = extract_name(pathname);
 
-    const char * dir_name = NULL;
-    const char * file_name = "/testfile";
+    printf("__create_file\n");
+    char * dir_name = fnbuf;
+    char * file_name = fnbuf2;
+    int len = strlen(pathname) + 1;
+    int lastslash = len;
+    while (--lastslash > 0){
+        printf("loop..%d\n", lastslash);
+        if(pathname[lastslash] == '/') break;
+    }
+    printf("finished loop..\n");
+    memset(dir_name, 0, 256);
+    memset(file_name, 0, 256);
+    memcpy(dir_name, pathname, lastslash);
+    if (lastslash)
+        memcpy(file_name, pathname + lastslash + 1, len - lastslash);
+    else
+        memcpy(file_name, pathname + lastslash, len - lastslash);
+
+    printf("dir name: %s\n", dir_name);
+    printf("file name: %s\n", file_name);
 
     int dir = __find_file(dir_name);
+    printf("dir num: %d\n", dir);
 
     struct fsnode * first_file_node = (struct fsnode *) mem_alloc(sizeof(struct fsnode));
     first_file_node->prev = NULL;
@@ -79,10 +110,14 @@ int __create_file(const char * pathname) {
 
 
     //todo аааай вааай апасна
-    struct link * new_link = (struct link *) &FILE_TABLE[dir].start->data + FILE_TABLE[dir].byte_size;
-    new_link->target = &FILE_TABLE[empty_file_slot_index];
-    new_link->name = file_name;
+    if (dir != FILE_TABLE_SIZE) {
+        struct link * new_link = (struct link *) &FILE_TABLE[dir].start->data + FILE_TABLE[dir].byte_size;
+        new_link->target = &FILE_TABLE[empty_file_slot_index];
+        new_link->name = file_name;
+    }
 
+
+    printf("__create_file end\n");
     return empty_file_slot_index;
 }
 
@@ -94,21 +129,24 @@ int __create_dir(const char* pathname) {
 
 void create(const char * pathname){
 
+    printf("create\n");
     if(__find_file(pathname) != FILE_TABLE_SIZE) throw_ex("trying to create file which already exists");
-    printf("\n\n\nSUCCESS\n\n\n");
     __create_file(pathname);
+    printf("create end\n");
 
 }
 
 struct FILE * open(const char * pathname) {
 
-    int i = __find_file(pathname);
-    if (i == FILE_TABLE_SIZE) throw_ex("file not found");
+    printf("trying to open.. %s\n", pathname);
+    int found_file_id = __find_file(pathname);
+    printf("found file id: %d\n", found_file_id);
+    if (found_file_id == FILE_TABLE_SIZE) throw_ex("file not found");
 
 
-    FILE_TABLE[i].state = OPENED;
+    FILE_TABLE[found_file_id].state = OPENED;
 
-    return &FILE_TABLE[i];
+    return &FILE_TABLE[found_file_id];
 }
 
 void close(struct FILE * file) {
@@ -204,6 +242,7 @@ const char * read_file_to_string(struct FILE * file) {
 void mkdir(const char * pathname) {
     if(__find_file(pathname) != FILE_TABLE_SIZE) throw_ex("trying to create directory which already exists");
     int file_id = __create_file(pathname);
+    FILE_TABLE[file_id].type = FILE_TYPE_DIR;
 }
 
 
