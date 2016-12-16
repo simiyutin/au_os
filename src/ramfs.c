@@ -7,6 +7,7 @@
 #include "../inc/print.h"
 #include "../inc/throw.h"
 
+
 int get_empty_file_slot() {
     int i = 0;
     for (;FILE_TABLE[i].state != DELETED; ++i){
@@ -144,15 +145,21 @@ int __create_file(const char * pathname) {
 
 void create(const char * pathname){
 
+    lock(&ramfs_lock);
+
     printf("create\n");
     if(__find_file(pathname) != FILE_TABLE_SIZE) throw_ex("trying to create file which already exists");
     printf("file is not already created, ok..\n");
     __create_file(pathname);
     printf("create end\n");
 
+    unlock(&ramfs_lock);
+
 }
 
 struct FILE * open(const char * pathname) {
+
+    lock(&ramfs_lock);
 
     printf("trying to open.. %s\n", pathname);
     int found_file_id = __find_file(pathname);
@@ -162,11 +169,15 @@ struct FILE * open(const char * pathname) {
 
     FILE_TABLE[found_file_id].state = OPENED;
 
+    unlock(&ramfs_lock);
+
     return &FILE_TABLE[found_file_id];
 }
 
 void close(struct FILE * file) {
+    lock(&file->lock);
     file->state = CLOSED;
+    unlock(&file->lock);
 }
 
 struct fsnode * find_node_by_position(struct fsnode * node, int * pos) {
@@ -179,6 +190,8 @@ struct fsnode * find_node_by_position(struct fsnode * node, int * pos) {
 }
 
 char readchar(struct FILE * file, int shift) {
+
+    lock(&file->lock);
 
     if (file->state != OPENED) throw_ex("trying to read closed file");
     if (file->byte_size <= shift) throw_ex("trying to read file out of range");
@@ -197,11 +210,15 @@ char readchar(struct FILE * file, int shift) {
     file->current_reading_pos = pos;
     file->current_reading_byte = shift;
 
+    unlock(&file->lock);
+
     return block_shift->data[pos];
 }
 
 
 void writechar(struct FILE * file, int shift, char value) {
+
+    lock(&file->lock);
 
     if (file->state != OPENED) throw_ex("trying to write to closed file");
     if (file->byte_size < shift) throw_ex("trying to write leaving gap of trash");
@@ -231,6 +248,8 @@ void writechar(struct FILE * file, int shift, char value) {
     file->current_writing_node = block_shift;
     file->current_writing_byte = shift;
     file->current_writing_pos = pos;
+
+    unlock(&file->lock);
 }
 
 void writestring(struct FILE * file, const char * string_to_write) {
@@ -253,14 +272,19 @@ const char * read_file_to_string(struct FILE * file) {
 
 
 void mkdir(const char * pathname) {
+    lock(&ramfs_lock);
     if(__find_file(pathname) != FILE_TABLE_SIZE) throw_ex("trying to create directory which already exists");
     int file_id = __create_file(pathname);
     FILE_TABLE[file_id].type = FILE_TYPE_DIR;
+    unlock(&ramfs_lock);
 }
 
 char * readdir(const char * pathname) {
 
+    lock(&ramfs_lock);
     struct FILE * dir = &FILE_TABLE[__find_file(pathname)];
+    unlock(&ramfs_lock);
+    lock(&dir->lock);
 
     if (dir->type != FILE_TYPE_DIR) throw_ex("wrong argument - directory is awaited");
     int concatenated_str_length = 0;
@@ -290,6 +314,8 @@ char * readdir(const char * pathname) {
     printf("filled length: %d , concatenated length: %d\n", filled_length, concatenated_str_length);
 
     result_string[filled_length] = NULL;
+
+    unlock(&dir->lock);
 
     return result_string;
 }

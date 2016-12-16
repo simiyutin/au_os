@@ -1,3 +1,4 @@
+#include "concurrency.h"
 #ifndef SRC_RAMFS_H
 #define SRC_RAMFS_H
 #define BLOCK_SIZE 512
@@ -42,17 +43,22 @@ struct FILE {
     FILE_STATE state;
 
     FILE_TYPE type;
+
+    struct spinlock lock;
+
 };
 
-struct FILE FILE_TABLE[FILE_TABLE_SIZE];
 
-int get_empty_file_slot();
-void create(const char * pathname); // todo mak returning file created
-struct FILE * open(const char * pathname); //todo w+, w, r
+struct FILE FILE_TABLE[FILE_TABLE_SIZE];
+static struct spinlock ramfs_lock;
+
+void create(const char * pathname);
+struct FILE * open(const char * pathname);
 void close(struct FILE * file);
 
 char readchar(struct FILE * file, int shift);
 void writechar(struct FILE * file, int shift, char value);
+
 void writestring(struct FILE *, const char *);
 const char * read_file_to_string(struct FILE * file);
 
