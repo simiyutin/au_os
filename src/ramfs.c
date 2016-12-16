@@ -150,7 +150,11 @@ void create(const char * pathname){
     lock(&ramfs_lock);
 
     printf("create\n");
-    if(__find_file(pathname) != FILE_TABLE_SIZE) throw_ex("trying to create file which already exists");
+    if(__find_file(pathname) != FILE_TABLE_SIZE){
+        printf("file was already created, ok..\n");
+        unlock(&ramfs_lock);
+        return;
+    };
     printf("file is not already created, ok..\n");
     __create_file(pathname);
     printf("create end\n");
