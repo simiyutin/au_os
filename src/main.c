@@ -185,6 +185,8 @@ void test_fs() {
     writestring(deep_file, "nereal'no kruto!");
     printf("%s\n", read_file_to_string(deep_file));
 
+    printf("\n\n\n READDIR ROOT!!! %s\n\n\n", readdir("root"));
+
     mkdir("usr");
     create("usr/subfile");
     struct FILE * usr_file = open("usr/subfile");

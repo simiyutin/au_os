@@ -57,7 +57,7 @@ void writestring(struct FILE *, const char *);
 const char * read_file_to_string(struct FILE * file);
 
 void mkdir(const char * pathname);
-//todo readdir
+char * readdir(const char * pathname);
 
 
 #endif //SRC_RAMFS_H

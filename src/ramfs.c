@@ -15,6 +15,11 @@ int get_empty_file_slot() {
     return i;
 }
 
+int get_number_of_links(struct FILE * file) {
+    int NUMBER_OF_LINKS = file->byte_size / sizeof (struct link);
+    return NUMBER_OF_LINKS;
+}
+
 int __recursive_search(int prev_id, char * pathname) {
 
     char * filename = strsep(&pathname, "/");
@@ -27,12 +32,11 @@ int __recursive_search(int prev_id, char * pathname) {
     if (prev_file.type != FILE_TYPE_DIR) throw_ex("no such directory");
     printf("recursive search: passed first step\n");
 
-    int NUMBER_OF_LINKS = prev_file.byte_size / sizeof (struct link);
-
-    printf("prev dir number of links: %d\n", NUMBER_OF_LINKS);
 
     // TODO VERY IMPORTANT HANDLE CASE WHEN DIRECTORY HAS MORE FILES THAN FIT IN ONE BLOCK
     // TODO OR RESTRICT NUMBER OF FILES IN DIR BY SIZE OF BLOCK
+    int NUMBER_OF_LINKS = get_number_of_links(&prev_file);
+    printf("prev dir number of links: %d\n", NUMBER_OF_LINKS);
     struct link * links = (struct link *) prev_file.start->data;
 
     printf("start search in directory\n");
@@ -252,6 +256,42 @@ void mkdir(const char * pathname) {
     if(__find_file(pathname) != FILE_TABLE_SIZE) throw_ex("trying to create directory which already exists");
     int file_id = __create_file(pathname);
     FILE_TABLE[file_id].type = FILE_TYPE_DIR;
+}
+
+char * readdir(const char * pathname) {
+
+    struct FILE * dir = &FILE_TABLE[__find_file(pathname)];
+
+    if (dir->type != FILE_TYPE_DIR) throw_ex("wrong argument - directory is awaited");
+    int concatenated_str_length = 0;
+    int NUMBER_OF_LINKS = get_number_of_links(dir);
+    struct link * links = (struct link *) dir->start->data;
+
+    printf("start search in directory\n");
+
+    for (int cur_id = 0; cur_id < NUMBER_OF_LINKS; ++cur_id) {
+
+        concatenated_str_length += strlen(links[cur_id].name) + 1;
+
+    };
+
+    concatenated_str_length += 1; // null terminator
+
+    char * result_string = mem_alloc(concatenated_str_length);
+    int filled_length = 0;
+    for (int cur_id = 0; cur_id < NUMBER_OF_LINKS; ++cur_id) {
+        printf("filename: %s\n", links[cur_id].name);
+        int name_length = strlen(links[cur_id].name);
+        memcpy(result_string + filled_length, links[cur_id].name, name_length);
+        result_string[filled_length + name_length] = ' ';
+        filled_length += name_length + 1;
+    };
+
+    printf("filled length: %d , concatenated length: %d\n", filled_length, concatenated_str_length);
+
+    result_string[filled_length] = NULL;
+
+    return result_string;
 }
 
 
