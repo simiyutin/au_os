@@ -200,7 +200,10 @@ char readchar(struct FILE * file, int shift) {
     lock(&file->lock);
 
     if (file->state != OPENED) throw_ex("trying to read closed file");
-    if (file->byte_size <= shift) throw_ex("trying to read file out of range");
+    if (file->byte_size <= shift) {
+        unlock(&file->lock);
+        return NULL;
+    }
 
     struct fsnode * block_base;
     int pos = shift;
@@ -217,7 +220,6 @@ char readchar(struct FILE * file, int shift) {
     file->current_reading_byte = shift;
 
     unlock(&file->lock);
-
     return block_shift->data[pos];
 }
 
