@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 #include "../inc/ramfs.h"
 #include "../inc/alloc.h"
 #include "../inc/print.h"
@@ -14,9 +15,11 @@ int get_empty_file_slot() {
 
 int __recursive_search(int prev_id, char * pathname) {
 
-
     char * filename = strsep(&pathname, "/");
-    if (filename == NULL) return prev_id;
+    if (filename == NULL){
+        printf("next iteration aborted, file found\n");
+        return prev_id;
+    }
     printf("recursive search: filename: %s\n", filename);
     struct FILE prev_file = FILE_TABLE[prev_id];
     if (prev_file.type != FILE_TYPE_DIR) throw_ex("no such directory"); //todo may be return FILE_TABLE_SIZE
@@ -24,11 +27,13 @@ int __recursive_search(int prev_id, char * pathname) {
 
     int NUMBER_OF_LINKS = prev_file.byte_size / sizeof (struct link); //todo case when file and directory names are equal
 
+    printf("prev dir number of links: %d\n", NUMBER_OF_LINKS);
+
     // TODO VERY IMPORTANT HANDLE CASE WHEN DIRECTORY HAS MORE FILES THAN FIT IN ONE BLOCK
     // TODO OR RESTRICT NUMBER OF FILES IN DIR BY SIZE OF BLOCK
     struct link * links = (struct link *) prev_file.start->data;
 
-
+    printf("start search in directory\n");
     int cur_id = 0;
     for (;cur_id < NUMBER_OF_LINKS &&
           (links[cur_id].target->state == DELETED ||
@@ -36,9 +41,14 @@ int __recursive_search(int prev_id, char * pathname) {
            strcmp(links[cur_id].name, filename) != 0
           ); ++cur_id);
 
+    printf("cycle ended\n");
     if (cur_id == NUMBER_OF_LINKS) return FILE_TABLE_SIZE; // not found
 
-    return __recursive_search(cur_id, pathname);
+    printf("%d\n", links[cur_id].target);
+    printf("%d\n", FILE_TABLE);
+    int file_index_in_table = ((uint64_t) links[cur_id].target - (uint64_t) FILE_TABLE) / sizeof(struct FILE);
+    printf("next file index: %d\n", file_index_in_table);
+    return __recursive_search(file_index_in_table, pathname);
 
 }
 
@@ -62,7 +72,7 @@ int __find_file(const char *pathname) {
 
     if (i == FILE_TABLE_SIZE) return i;
 
-    printf("entering recursive search..\n");
+    printf("entering recursive search.. start file/dir: %d\n", i);
     return __recursive_search(i, duplicated_filename);
 }
 
@@ -81,7 +91,7 @@ int __create_file(const char * pathname) {
     printf("__create_file: %s\n", pathname);
     int last_slash = find_last_slash(pathname);
     int len = strlen(pathname) + 1;
-    char * dir_name = mem_alloc(last_slash + 1);
+    char * dir_name = mem_alloc(last_slash + 1);//todo free
     char * file_name = mem_alloc(len - last_slash);
 
     if (last_slash == -1) {
@@ -111,9 +121,15 @@ int __create_file(const char * pathname) {
 
     //todo аааай вааай апасна
     if (dir != FILE_TABLE_SIZE) {
-        struct link * new_link = (struct link *) &FILE_TABLE[dir].start->data + FILE_TABLE[dir].byte_size;
+        printf("\n\n\n\n\AND I AM DANGEROUS! \n\n\n\n");
+        struct link * links = (struct link *) &FILE_TABLE[dir].start->data;
+        int new_link_index = FILE_TABLE[dir].byte_size / sizeof(struct link);
+        struct link * new_link = &links[new_link_index];
+        FILE_TABLE[dir].byte_size += sizeof(struct link);
         new_link->target = &FILE_TABLE[empty_file_slot_index];
-        new_link->name = file_name;
+        new_link->name = file_name; //можно не освобождать, так как все равно удалять файлы не умеем
+        printf("debug, new_link->target->pathname: %s\n", links[new_link_index].target->pathname);
+        printf("debug, new_link->name: %s\n", links[new_link_index].name);
     }
 
 
@@ -121,16 +137,11 @@ int __create_file(const char * pathname) {
     return empty_file_slot_index;
 }
 
-int __create_dir(const char* pathname) {
-    int result = __create_file(pathname);
-    FILE_TABLE[result].type = FILE_TYPE_DIR;
-    return result;
-}
-
 void create(const char * pathname){
 
     printf("create\n");
     if(__find_file(pathname) != FILE_TABLE_SIZE) throw_ex("trying to create file which already exists");
+    printf("file is not already created, ok..\n");
     __create_file(pathname);
     printf("create end\n");
 
@@ -152,9 +163,6 @@ struct FILE * open(const char * pathname) {
 void close(struct FILE * file) {
     file->state = CLOSED;
 }
-
-
-
 
 struct fsnode * find_node_by_position(struct fsnode * node, int * pos) {
 
