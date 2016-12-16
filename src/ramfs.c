@@ -7,6 +7,8 @@
 #include "../inc/print.h"
 #include "../inc/throw.h"
 
+struct FILE FILE_TABLE[FILE_TABLE_SIZE];
+struct spinlock ramfs_lock;
 
 int get_empty_file_slot() {
     int i = 0;

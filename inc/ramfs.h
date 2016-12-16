@@ -52,8 +52,8 @@ struct FILE {
 };
 
 
-struct FILE FILE_TABLE[FILE_TABLE_SIZE];
-static struct spinlock ramfs_lock;
+extern struct FILE FILE_TABLE[];
+extern struct spinlock ramfs_lock;
 
 void create(const char * pathname);
 struct FILE * open(const char * pathname);
