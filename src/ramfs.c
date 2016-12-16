@@ -6,9 +6,6 @@
 #include "../inc/print.h"
 #include "../inc/throw.h"
 
-char fnbuf[256];
-char fnbuf2[256];
-
 int get_empty_file_slot() {
     int i = 0;
     for (;FILE_TABLE[i].state != DELETED; ++i){} //todo handle out of range
@@ -50,14 +47,11 @@ int __find_file(const char *pathname) {
     printf("__find_file\n");
     if (pathname == NULL) return FILE_TABLE_SIZE;
 
-    char * duplicated_filename = fnbuf;
-    memset(duplicated_filename, 0, 256);
-
-    size_t len = strlen(pathname) + 1;
-    memcpy (duplicated_filename, pathname, len);
+    char * duplicated_filename = strdup(pathname); // todo free
 
     char * filename = strsep(&duplicated_filename, "/");
     printf("extracted filename: %s\n", filename);
+
     //find entry point to recursion
     int i = 0;
     for (;i < FILE_TABLE_SIZE &&
@@ -72,28 +66,34 @@ int __find_file(const char *pathname) {
     return __recursive_search(i, duplicated_filename);
 }
 
-int __create_file(const char * pathname) {
+int find_last_slash(const char * pathname) {
 
-    printf("__create_file\n");
-    char * dir_name = fnbuf;
-    char * file_name = fnbuf2;
-    int len = strlen(pathname) + 1;
-    int lastslash = len;
-    while (--lastslash > 0){
-        printf("loop..%d\n", lastslash);
+    int lastslash = strlen(pathname) - 1;
+    while (lastslash-- > 0){
         if(pathname[lastslash] == '/') break;
     }
-    printf("finished loop..\n");
-    memset(dir_name, 0, 256);
-    memset(file_name, 0, 256);
-    memcpy(dir_name, pathname, lastslash);
-    if (lastslash)
-        memcpy(file_name, pathname + lastslash + 1, len - lastslash);
-    else
-        memcpy(file_name, pathname + lastslash, len - lastslash);
 
-    printf("dir name: %s\n", dir_name);
-    printf("file name: %s\n", file_name);
+    return lastslash;
+}
+
+int __create_file(const char * pathname) {
+
+    printf("__create_file: %s\n", pathname);
+    int last_slash = find_last_slash(pathname);
+    int len = strlen(pathname) + 1;
+    char * dir_name = mem_alloc(last_slash + 1);
+    char * file_name = mem_alloc(len - last_slash);
+
+    if (last_slash == -1) {
+        dir_name = NULL;
+        memcpy(file_name, pathname, len);
+    } else {
+        memcpy(dir_name, pathname, last_slash);
+        dir_name[last_slash] = NULL;
+        memcpy(file_name, pathname + last_slash + 1, len);
+        printf("dir name: %s\n", dir_name);
+        printf("file name: %s\n", file_name);
+    }
 
     int dir = __find_file(dir_name);
     printf("dir num: %d\n", dir);
