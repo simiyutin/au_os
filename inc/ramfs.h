@@ -2,6 +2,7 @@
 #ifndef SRC_RAMFS_H
 #define SRC_RAMFS_H
 #define BLOCK_SIZE 512
+#define LINK_SIZE sizeof(struct link)
 #define FILE_TABLE_SIZE 128
 struct fsnode {
     struct fsnode * next;
@@ -23,6 +24,8 @@ struct link {
     const char * name;
     struct FILE * target;
 };
+
+
 
 struct FILE {
 

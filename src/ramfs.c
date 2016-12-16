@@ -34,8 +34,6 @@ int __recursive_search(int prev_id, char * pathname) {
     printf("recursive search: passed first step\n");
 
 
-    // TODO VERY IMPORTANT HANDLE CASE WHEN DIRECTORY HAS MORE FILES THAN FIT IN ONE BLOCK
-    // TODO OR RESTRICT NUMBER OF FILES IN DIR BY SIZE OF BLOCK
     int NUMBER_OF_LINKS = get_number_of_links(&prev_file);
     printf("prev dir number of links: %d\n", NUMBER_OF_LINKS);
     struct link * links = (struct link *) prev_file.start->data;
@@ -128,6 +126,8 @@ int __create_file(const char * pathname) {
 
     if (dir != FILE_TABLE_SIZE) {
         printf("\n\n\n\nAND I AM DANGEROUS! \n\n\n\n");
+        int NUMBER_OF_LINKS = get_number_of_links(&FILE_TABLE[dir]);
+        if (NUMBER_OF_LINKS > BLOCK_SIZE / LINK_SIZE - 1) throw_ex("dir capacity exceeded");
         struct link * links = (struct link *) &FILE_TABLE[dir].start->data;
         int new_link_index = FILE_TABLE[dir].byte_size / sizeof(struct link);
         struct link * new_link = &links[new_link_index];
