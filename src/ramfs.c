@@ -9,7 +9,9 @@
 
 int get_empty_file_slot() {
     int i = 0;
-    for (;FILE_TABLE[i].state != DELETED; ++i){} //todo handle out of range
+    for (;FILE_TABLE[i].state != DELETED; ++i){
+        if (i == FILE_TABLE_SIZE) throw_ex("no more empty slots for files!");
+    }
     return i;
 }
 
@@ -22,10 +24,10 @@ int __recursive_search(int prev_id, char * pathname) {
     }
     printf("recursive search: filename: %s\n", filename);
     struct FILE prev_file = FILE_TABLE[prev_id];
-    if (prev_file.type != FILE_TYPE_DIR) throw_ex("no such directory"); //todo may be return FILE_TABLE_SIZE
+    if (prev_file.type != FILE_TYPE_DIR) throw_ex("no such directory");
     printf("recursive search: passed first step\n");
 
-    int NUMBER_OF_LINKS = prev_file.byte_size / sizeof (struct link); //todo case when file and directory names are equal
+    int NUMBER_OF_LINKS = prev_file.byte_size / sizeof (struct link);
 
     printf("prev dir number of links: %d\n", NUMBER_OF_LINKS);
 
@@ -42,7 +44,7 @@ int __recursive_search(int prev_id, char * pathname) {
           ); ++cur_id);
 
     printf("cycle ended\n");
-    if (cur_id == NUMBER_OF_LINKS) return FILE_TABLE_SIZE; // not found
+    if (cur_id == NUMBER_OF_LINKS) return FILE_TABLE_SIZE;
 
     printf("%d\n", links[cur_id].target);
     printf("%d\n", FILE_TABLE);
@@ -119,9 +121,8 @@ int __create_file(const char * pathname) {
     FILE_TABLE[empty_file_slot_index].type = FILE_TYPE_FILE;
 
 
-    //todo аааай вааай апасна
     if (dir != FILE_TABLE_SIZE) {
-        printf("\n\n\n\n\AND I AM DANGEROUS! \n\n\n\n");
+        printf("\n\n\n\nAND I AM DANGEROUS! \n\n\n\n");
         struct link * links = (struct link *) &FILE_TABLE[dir].start->data;
         int new_link_index = FILE_TABLE[dir].byte_size / sizeof(struct link);
         struct link * new_link = &links[new_link_index];
