@@ -59,7 +59,7 @@ void create(const char * pathname);
 struct FILE * open(const char * pathname);
 void close(struct FILE * file);
 
-char readchar(struct FILE * file, int shift);
+int readchar(struct FILE * file, int shift);
 void writechar(struct FILE * file, int shift, char value);
 
 void writestring(struct FILE *, const char *);

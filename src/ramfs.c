@@ -195,14 +195,14 @@ struct fsnode * find_node_by_position(struct fsnode * node, int * pos) {
     return node;
 }
 
-char readchar(struct FILE * file, int shift) {
+int readchar(struct FILE * file, int shift) {
 
     lock(&file->lock);
 
     if (file->state != OPENED) throw_ex("trying to read closed file");
     if (file->byte_size <= shift) {
         unlock(&file->lock);
-        return NULL;
+        return -1;
     }
 
     struct fsnode * block_base;
@@ -272,7 +272,7 @@ const char * read_file_to_string(struct FILE * file) {
 
     char * result = mem_alloc(file->byte_size + 1);
     for (size_t i = 0; i < file->byte_size; ++i) {
-        result[i] = readchar(file, i);
+        result[i] = (char) readchar(file, i);
     }
     result[file->byte_size] = '\0';
     return result;

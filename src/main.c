@@ -210,10 +210,10 @@ void test_fs() {
     writestring(first_file, string_to_write);
 
     printf("\n");
-    assert(readchar(first_file, 0) == 'a');
-    assert(readchar(first_file, 1) == 'b');
-    assert(readchar(first_file, 2) == 'c');
-    assert(readchar(first_file, 3) == 'd');
+    assert((char) readchar(first_file, 0) == 'a');
+    assert((char) readchar(first_file, 1) == 'b');
+    assert((char) readchar(first_file, 2) == 'c');
+    assert((char) readchar(first_file, 3) == 'd');
     printf("\n");
     assert(strcmp(string_to_write,
                   read_file_to_string(first_file)) == 0);
