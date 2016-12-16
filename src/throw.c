@@ -10,3 +10,6 @@ void throw_ex(const char * what) {
     (void *) b;
 }
 
+void assert(int condition) {
+    if (!condition) throw_ex("assertion failed");
+}

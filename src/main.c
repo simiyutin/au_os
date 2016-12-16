@@ -164,10 +164,11 @@ void test_threadfunc(void *arg) {
     thread_run(&slave_thread, &master_thread);
 }
 
+
+
 void test_fs() {
 
     mkdir("root");
-    printf("directry created!\n");
     create("root/ground_zero_file");
     struct FILE * dir_file = open("root/ground_zero_file");
     writestring(dir_file, "asdf");
@@ -178,40 +179,57 @@ void test_fs() {
     writestring(second_dir_file, "ghjk");
     printf("%s\n", read_file_to_string(second_dir_file));
 
-//    const char * pathname = "testfile";
-//    create(pathname);
-//    struct FILE * first_file = open(pathname);
-//    assert(strcmp(first_file->pathname, pathname) == 0);
-//    printf(first_file->pathname);
-//    printf("\n");
-//    const char * string_to_write = "abcd";
-//    writestring(first_file, string_to_write);
-//
-//    printf("\n");
-//    assert(readchar(first_file, 0) == 'a');
-//    assert(readchar(first_file, 1) == 'b');
-//    assert(readchar(first_file, 2) == 'c');
-//    assert(readchar(first_file, 3) == 'd');
-//    printf("\n");
-//    assert(strcmp(string_to_write,
-//                  read_file_to_string(first_file)) == 0);
-//
-//
-//    //stress test
-//    printf("stress test start..\n");
-//    for(size_t i = 0 ; i < 10000000; ++i) { // ten megabytes, fails on 100 megabytes
-//        writestring(first_file, "a");
-//    }
-//
-//    printf("stress test end.\n");
-//
-//    close(first_file);
+    mkdir("root/subdir");
+    create("root/subdir/whoooohoo");
+    struct FILE * deep_file = open("root/subdir/whoooohoo");
+    writestring(deep_file, "nereal'no kruto!");
+    printf("%s\n", read_file_to_string(deep_file));
+
+    mkdir("usr");
+    create("usr/subfile");
+    struct FILE * usr_file = open("usr/subfile");
+    writestring(usr_file, "new folder test");
+    printf("%s\n", read_file_to_string(usr_file));
+
+    mkdir("dup");
+    create("dup/dup");
+    struct FILE * dup_dup = open("dup/dup");
+    writestring(dup_dup, "\n\nsame name \n\n");
+    printf("%s\n", read_file_to_string(dup_dup));
+
+
+    const char * pathname = "testfile";
+    create(pathname);
+    struct FILE * first_file = open(pathname);
+    assert(strcmp(first_file->pathname, pathname) == 0);
+    printf(first_file->pathname);
+    printf("\n");
+    const char * string_to_write = "abcd";
+    writestring(first_file, string_to_write);
+
+    printf("\n");
+    assert(readchar(first_file, 0) == 'a');
+    assert(readchar(first_file, 1) == 'b');
+    assert(readchar(first_file, 2) == 'c');
+    assert(readchar(first_file, 3) == 'd');
+    printf("\n");
+    assert(strcmp(string_to_write,
+                  read_file_to_string(first_file)) == 0);
+
+
+    //stress test
+    printf("stress test start..\n");
+    for(size_t i = 0 ; i < 10000000; ++i) { // ten megabytes, fails on 100 megabytes
+        writestring(first_file, "a");
+    }
+
+    printf("stress test end.\n");
+
+    close(first_file);
 
 }
 
-void assert(int condition) {
-    if (!condition) throw_ex("assertion failed");
-}
+
 
 
 void main(void *bootstrap_info) {
