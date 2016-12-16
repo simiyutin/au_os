@@ -1,5 +1,6 @@
 #include <stddef.h>
 #include <stdlib.h>
+#include <string.h>
 #include "../inc/ramfs.h"
 #include "../inc/alloc.h"
 #include "../inc/print.h"
@@ -72,7 +73,6 @@ int __find_file(const char *pathname) {
 }
 
 int __create_file(const char * pathname) {
-
 
     printf("__create_file\n");
     char * dir_name = fnbuf;

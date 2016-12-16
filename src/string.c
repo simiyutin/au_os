@@ -31,7 +31,6 @@ void *memset(void *dst, int fill, size_t size)
 
 char *strdup (const char *s)
 {
-    printf("STRDUP CALLED\n");
     size_t len = strlen(s) + 1;
     char *new = mem_alloc (len);
 
@@ -40,7 +39,6 @@ char *strdup (const char *s)
 
     memcpy (new, s, len);
 
-    printf("numeric pointer: %d\n", (int) new);
     return new;
 }
 

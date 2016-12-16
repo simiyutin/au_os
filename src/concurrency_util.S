@@ -28,4 +28,4 @@ switch_thread:
 start_thread_handler:
     movq %r14, %rdi
     cld
-    call %r15
+    call *%r15
